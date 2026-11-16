@@ -134,3 +134,28 @@ fieldset{padding:0;border:0;margin:0 0 17px}
 .guest-review-byline span{font-size:11px;color:#6a675f}
 .review-original{display:inline-block;font-size:12px;font-weight:700;margin-top:12px;text-decoration:underline;text-underline-offset:2px;color:#8c1321}
 @media(max-width:650px){.cat-event{align-items:flex-start;gap:15px;padding:16px;margin:22px 0 0}.cat-event-photo{width:76px;height:76px;border-radius:14px}.cat-event h2{font-size:22px}.cat-event-content>p:not(.cat-event-eyebrow){font-size:12px}.cat-event-content a{font-size:12px}}
+
+
+/* Google-inspired review layout with ordinary initials, not cat avatars */
+.review-avatar{display:inline-grid;place-items:center;flex-shrink:0;width:40px;height:40px;border-radius:50%;background:#dbe8ff;color:#285f99;font-size:19px;font-weight:650}
+.guest-review:nth-child(5n+2) .review-avatar{background:#f8dfe5;color:#9b375b}
+.guest-review:nth-child(5n+3) .review-avatar{background:#e1efdf;color:#327142}
+.guest-review:nth-child(5n+4) .review-avatar{background:#fff1d9;color:#8c6019}
+.guest-review:nth-child(5n+5) .review-avatar{background:#e8dff5;color:#694a95}
+.guest-review-byline{margin-bottom:12px}
+.guest-review-byline strong{font-weight:600;font-size:14px}
+.guest-review-byline span:not(.review-avatar){font-size:12px}
+.guest-review{background:#fff;padding:17px 18px;border-radius:13px;border:1px solid #e8e8e8}
+.review-meta{gap:10px;justify-content:flex-start}
+.public-stars{color:#f9ab00;gap:1px}
+.guest-review p{margin:9px 0 0;color:#303030;line-height:1.52;font-size:14px}
+.sample-reviews{margin-top:33px;padding-top:24px;border-top:1px solid #e4e2dc}
+.sample-heading{display:flex;align-items:center;justify-content:space-between;gap:13px}
+.sample-kicker{font-size:10px;font-weight:800;letter-spacing:1.4px;color:#a82c24;margin-bottom:5px}
+.sample-heading h3{font-size:24px;letter-spacing:-.8px}
+.sample-count{font-size:11px;font-weight:750;border-radius:30px;background:#f9efd9;border:1px solid #ead9b2;padding:7px 10px;white-space:nowrap}
+.sample-disclosure{margin:10px 0 16px;font-size:13px;line-height:1.5;color:#635f58}
+.review-demo-label{font-size:9px;letter-spacing:1px;color:#8c641c;border:1px solid #f2ddae;background:#fff7e6;padding:3px 6px;border-radius:4px;font-weight:800}
+.sample-more{width:100%;border:1px solid #d9d5cf;padding:14px 16px;border-radius:10px;margin-top:15px;font-weight:700;background:#fff;transition:background .15s}
+.sample-more:hover{background:#fff8e7}
+@media(max-width:650px){.sample-heading h3{font-size:21px}.guest-review{padding:14px 15px}.sample-reviews{margin-top:26px}}
