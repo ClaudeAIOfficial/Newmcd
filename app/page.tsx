@@ -159,7 +159,7 @@ export default function Home() {
       <div className="below">
         <section id="reviews" className="reviews" aria-labelledby="reviews-title">
           <div className="review-heading"><h2 id="reviews-title">Guest reviews</h2>{listState === "ready" && <span className="count" aria-label={reviews.length + " reviews"}>{reviews.length}</span>}</div><div className="review-filters" role="group" aria-label="Filter reviews by star rating">
-              {[0,5,4,3,2,1].map(stars => <button key={stars} type="button" className={"rating-filter" + (sampleRatingFilter === stars ? " active" : "")} aria-pressed={sampleRatingFilter === stars} onClick={() => {setSampleRatingFilter(stars);setVisibleSamples(12);}}>{stars === 0 ? "All ratings" : stars + " ★"}</button>)}
+              {[0,5,4,3,2,1].map(stars => <button key={stars} type="button" className={"rating-filter" + (sampleRatingFilter === stars ? " active" : "")} aria-pressed={sampleRatingFilter === stars} onClick={() => {setSampleRatingFilter(stars);setVisibleSamples(12);}}>{stars === 0 ? "All ratings" : stars + " ★"} <span className="rating-filter-count">{stars === 0 ? sampleReviews.length + reviews.length : sampleReviews.filter(r => r.rating === stars).length + reviews.filter(r => r.rating === stars).length}</span></button>)}
             </div>
           {listState === "ready" && reviews.length > 0 && (
             <div className="review-list published-review-list" aria-live="polite">
