@@ -166,13 +166,7 @@ export default function Home() {
               {reviews.filter(r => sampleRatingFilter === 0 || r.rating === sampleRatingFilter).map(r => <ReviewCard key={r.id} review={r}/>)}
             </div>
           )}
-          <section className="sample-reviews" aria-labelledby="sample-review-title">
-            <h3 id="sample-review-title" className="sample-review-caption">Example reviews generated for layout testing, not customer submissions</h3>
-            
-            <p className="filter-count" aria-live="polite">Showing {Math.min(visibleSamples,filteredSamples.length)} of {filteredSamples.length} examples</p>
-            <div className="review-list">{filteredSamples.slice(0,visibleSamples).map(r => <ReviewCard key={r.id} review={r} demo/>)}</div>
-            {visibleSamples < filteredSamples.length && <button type="button" className="sample-more" onClick={() => setVisibleSamples(v=>Math.min(v+20,filteredSamples.length))}>Show more reviews ({filteredSamples.length-visibleSamples} remaining)</button>}
-          </section>
+
         </section>
         <aside className="receipt-card"><div className="receipt-copy"><h2>Got your receipt?</h2><p>You’ll need the number on it to leave a review.</p><button onClick={() => openPanel("help")} className="help-link">Find my receipt number <Icon name="arrow" size={15} /></button></div><ReceiptArt /></aside>
       </div>
