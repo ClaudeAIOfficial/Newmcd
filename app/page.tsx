@@ -28,10 +28,10 @@ function ReceiptArt() {
   return <div className="receipt-art" aria-hidden="true"><div className="paper"><Arches className="paper-arches" /><div className="paper-dash" /><div className="paper-rows"><i /><i /><i /></div><div className="order-stamp">ORDER #128</div><div className="barcode" /></div></div>;
 }
 
-type Review = { id: string; rating: number; text: string; date?: string; name?: string; source?: string; sourceUrl?: string; catAvatar?: boolean; catVariant?: 0 | 1 | 2 | 3 };
+type Review = { id: string; rating: number; text: string; date?: string; name?: string; source?: string; sourceUrl?: string; catAvatar?: boolean; catVariant?: 0 | 1 | 2 | 3; avatar?: string };
 type Panel = "receipt" | "review" | "help" | "thanks";
 const ratingLabels = ["Poor", "Fair", "Okay", "Good", "Excellent"];
-const receiptPattern = /^(?=.*[a-z0-9])[a-z0-9 #./-]{1,64}$/i;
+const receiptPattern = /^\d{26,64}$/;
 
 function ReviewCard({review:r,demo=false}:{review:Review;demo?:boolean}) {
   const displayName = r.name || "Guest";
@@ -41,7 +41,7 @@ function ReviewCard({review:r,demo=false}:{review:Review;demo?:boolean}) {
     : null;
   return <article className="guest-review" aria-label={demo ? "Sample review, not real customer feedback" : undefined}>
     <div className="guest-review-byline">
-      {demo && r.catAvatar ? <img className={`review-avatar review-avatar-cat variant-${r.catVariant ?? 0}`} src={(r.catVariant === 0 || r.catVariant === 2) ? "/review-cat-full.svg" : "/review-cat-avatar.jpg"} alt="" aria-hidden="true" width="40" height="40" loading="lazy"/> : <span className="review-avatar" aria-hidden="true">{initial}</span>}
+      {r.avatar ? <img className="review-avatar review-avatar-cat" src={r.avatar} alt="" aria-hidden="true" width="40" height="40" loading="lazy" /> : demo && r.catAvatar ? <img className={`review-avatar review-avatar-cat variant-${r.catVariant ?? 0}`} src={(r.catVariant === 0 || r.catVariant === 2) ? "/review-cat-full.svg" : "/review-cat-avatar.jpg"} alt="" aria-hidden="true" width="40" height="40" loading="lazy"/> : <span className="review-avatar" aria-hidden="true">{initial}</span>}
       <div><strong>{displayName}</strong>{!demo && <span>{r.source === "google" ? "Review from Google Maps" : "Guest feedback"}</span>}</div>
     </div>
     <div className="review-meta">
@@ -59,6 +59,9 @@ export default function Home() {
   const receiptField = useRef<HTMLInputElement>(null);
   const [panel, setPanel] = useState<Panel>("receipt");
   const [receipt, setReceipt] = useState("");
+  const [displayName, setDisplayName] = useState("");
+  const [avatar, setAvatar] = useState("");
+  const [avatarLoading, setAvatarLoading] = useState(false);
   const [rating, setRating] = useState(0);
   const [text, setText] = useState("");
   const [error, setError] = useState("");
@@ -116,10 +119,33 @@ export default function Home() {
     }
     requestAnimationFrame(() => heading.current?.focus({ preventScroll: true }));
   }
+  async function selectAvatar(file?: File) {
+    if (!file) { setAvatar(""); return; }
+    if (!["image/jpeg","image/png","image/webp"].includes(file.type) || file.size > 5 * 1024 * 1024) {
+      setError("Choose a JPG, PNG or WebP image smaller than 5 MB."); return;
+    }
+    setAvatarLoading(true); setError("");
+    try {
+      const url = URL.createObjectURL(file);
+      try {
+        const img = new Image();
+        img.src = url;
+        await img.decode();
+        const canvas = document.createElement("canvas");
+        canvas.width = canvas.height = 128;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) throw new Error("Image processing is unavailable.");
+        const side = Math.min(img.naturalWidth, img.naturalHeight);
+        ctx.drawImage(img, (img.naturalWidth - side)/2, (img.naturalHeight - side)/2, side, side, 0, 0, 128, 128);
+        setAvatar(canvas.toDataURL("image/jpeg", 0.7));
+      } finally { URL.revokeObjectURL(url); }
+    } catch { setError("Could not process this picture. Please try another."); }
+    finally { setAvatarLoading(false); }
+  }
   function advance(event: FormEvent) {
     event.preventDefault();
     if (!receiptPattern.test(receipt.trim())) {
-      setError("Enter the receipt or order number printed on your receipt.");
+      setError("Enter a number containing at least 26 digits.");
       receiptField.current?.focus();
       return;
     }
@@ -133,6 +159,8 @@ export default function Home() {
     event.preventDefault();
     if (sendingRef.current) return;
     if (!guestProfile || !receiptPattern.test(receipt.trim())) { setError("Enter a receipt number to create a guest profile."); setPanel("receipt"); return; }
+    if (!displayName.trim() || displayName.trim().length > 60) { setError("Enter a display name up to 60 characters."); return; }
+    if (avatarLoading) { setError("Wait for your profile picture to finish loading."); return; }
     if (!rating || !text.trim()) {
       setError(!rating ? "Choose a star rating for your visit." : "Write a few words about your visit.");
       return;
@@ -141,13 +169,13 @@ export default function Home() {
     try {
       const res = await fetch("/api/reviews", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ receipt, rating, text: text.trim(), submissionId: submissionId.current }),
+        body: JSON.stringify({ receipt, name: displayName.trim(), avatar, rating, text: text.trim(), submissionId: submissionId.current }),
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({})) as { error?: string };
         throw new Error(data.error || "Your review didn’t go through. Please try again.");
       }
-      setReceipt(""); setText(""); setRating(0); setGuestProfile(null); submissionId.current = "";
+      setReceipt(""); setDisplayName(""); setAvatar(""); setText(""); setRating(0); setGuestProfile(null); submissionId.current = "";
       setPanel("thanks");
     } catch (reason) {
       setError(reason instanceof TypeError ? "Check your connection and try again. Your review is still here." : (reason as Error).message);
@@ -188,6 +216,7 @@ export default function Home() {
               {filteredSamples.slice(0, visibleSamples).map(r => <ReviewCard key={r.id} review={r} demo />)}
             </div>
             {visibleSamples < filteredSamples.length && <button className="sample-more" type="button" onClick={() => setVisibleSamples(v => Math.min(v+20, filteredSamples.length))}>Show more reviews ({filteredSamples.length - visibleSamples} remaining)</button>}
+            <p className="sample-footer-disclaimer">The example reviews above are generated demonstrations, not actual customer submissions. Real guest reviews appear separately.</p>
           </section>
         </section>
         <aside className="receipt-card"><div className="receipt-copy"><h2>Got your receipt?</h2><p>You’ll need the number on it to leave a review.</p><button onClick={() => openPanel("help")} className="help-link">Find my receipt number <Icon name="arrow" size={15} /></button></div><ReceiptArt /></aside>
@@ -200,8 +229,8 @@ export default function Home() {
         <button className="close" aria-label="Close" disabled={sending} onClick={() => dialog.current?.close()}><Icon name="close" size={20}/></button>
         {panel === "help" ? <>
           <div className="modal-icon"><Icon name="receipt" size={26}/></div><h2 tabIndex={-1} ref={heading} id="dialog-title">Find your receipt number</h2>
-          <p className="dialog-blurb">Look for “Receipt #”, “Order #” or “Order number” on your printed or digital receipt. The wording and location can vary by restaurant.</p>
-          <div className="help-example"><ReceiptArt /><span>On this example receipt, you’d enter <strong>128</strong>.</span></div>
+          <p className="dialog-blurb">Enter the 26-digit or longer number from your receipt. This form checks the number’s length and format, but does not verify a purchase.</p>
+          <div className="help-example"><ReceiptArt /><span>Enter at least 26 digits with no spaces.</span></div>
           <button className="primary full" onClick={() => openPanel("receipt")}>Write a review <Icon name="arrow" size={18}/></button>
         </> : panel === "receipt" && !acceptingReviews ? <>
           <div className="modal-icon"><Icon name="chat" size={26}/></div>
@@ -216,20 +245,29 @@ export default function Home() {
           <div className="step-line"><Icon name={panel === "receipt" ? "receipt" : "pencil"} size={17} /><span>Step {panel === "receipt" ? "1" : "2"} of 2</span></div>
           <h2 tabIndex={-1} ref={heading} id="dialog-title">{panel === "receipt" ? "Have your receipt handy?" : "How was your visit?"}</h2>
           {panel === "receipt" ? <form onSubmit={advance}>
-            <p className="dialog-blurb">Enter the number on your receipt to create a guest profile and continue.</p>
-            <label htmlFor="receipt-number">Receipt number</label><input id="receipt-number" ref={receiptField} value={receipt} required maxLength={64} autoComplete="off" placeholder="e.g. 128" aria-describedby="receipt-privacy" onChange={e => { setReceipt(e.target.value); setError(""); }} />
+            <p className="dialog-blurb">Enter a number containing at least 26 digits to continue. We check the format, not whether it belongs to a purchase.</p>
+            <label htmlFor="receipt-number">Receipt number</label><input id="receipt-number" ref={receiptField} value={receipt} required maxLength={64} minLength={26} inputMode="numeric" pattern="[0-9]{26,64}" autoComplete="off" placeholder="26 digits minimum" aria-describedby="receipt-privacy" onChange={e => { setReceipt(e.target.value); setError(""); }} />
             <p id="receipt-privacy" className="field-hint">Your receipt number stays private.</p>
             <button type="button" className="text-button" aria-expanded={showHint} onClick={() => setShowHint(!showHint)}>Where do I find it?</button>
-            {showHint && <p className="hint-detail">Look for “Receipt #” or “Order #” on your receipt. If it says “Order #128”, enter 128.</p>}
+            {showHint && <p className="hint-detail">Type at least 26 digits without spaces or symbols.</p>}
             {error && <p className="error" role="alert">{error}</p>}
             <button className="primary full" type="submit">Continue <Icon name="arrow" size={18}/></button>
           </form> : <form onSubmit={submit}>
-            <p className="dialog-blurb">Your guest profile is ready. Give your visit a rating and tell us what stood out.</p>
+            <p className="dialog-blurb">Your number meets the 26-digit minimum. Choose a public display name and optional profile picture, then leave your review.</p>
+            <label htmlFor="reviewer-name">Display name</label>
+            <input id="reviewer-name" value={displayName} required maxLength={60} placeholder="Your public name" onChange={e => {setDisplayName(e.target.value);setError("");}} disabled={sending} />
+            <label htmlFor="reviewer-avatar" className="avatar-upload-label">Profile picture (optional)</label>
+            <div className="avatar-upload-row">
+              {avatar ? <img src={avatar} alt="Your profile picture preview" className="review-avatar" /> : <span className="review-avatar">{displayName.trim().charAt(0).toUpperCase() || "?"}</span>}
+              <input id="reviewer-avatar" type="file" accept="image/png,image/jpeg,image/webp" disabled={sending || avatarLoading} onChange={e => {void selectAvatar(e.target.files?.[0]);}} />
+              {avatar && <button type="button" onClick={() => setAvatar("")}>Remove</button>}
+            </div>
+            <p className="field-hint">Your name and picture appear publicly beside the review.</p>
             <fieldset disabled={sending}><legend>Your rating</legend><div className="rating">{ratingLabels.map((label, i) => <label className={"star-choice" + (rating >= i+1 ? " selected" : "")} key={label}><input type="radio" name="rating" required value={i+1} aria-label={i+1 + (i === 0 ? " star, " : " stars, ") + label} checked={rating === i+1} onChange={() => {setRating(i+1);setError("");}} /><Icon name="star" size={32} filled={rating >= i+1} /></label>)}</div><p className="rating-label">{rating ? ratingLabels[rating-1] : "Select a rating"}</p></fieldset>
             <label htmlFor="review-text">Your review</label><textarea id="review-text" required maxLength={2000} rows={4} disabled={sending} value={text} onChange={e => {setText(e.target.value);setError("");}} placeholder="What would you like us to know?" />
             <span className="character-count">{text.length.toLocaleString()} / 2,000</span>
             {error && <p className="error" role="alert">{error}</p>}
-            <div className="form-actions"><button type="button" className="back" disabled={sending} onClick={() => {setError("");setPanel("receipt");}}><Icon name="back" size={17}/> Back</button><button className="primary" type="submit" disabled={sending}>{sending ? "Sending…" : "Submit review"}<Icon name="arrow" size={18}/></button></div>
+            <div className="form-actions"><button type="button" className="back" disabled={sending} onClick={() => {setError("");setPanel("receipt");}}><Icon name="back" size={17}/> Back</button><button className="primary" type="submit" disabled={sending || avatarLoading}>{sending ? "Sending…" : "Submit review"}<Icon name="arrow" size={18}/></button></div>
           </form>}
         </>}
       </div>
