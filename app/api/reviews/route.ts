@@ -1,4 +1,3 @@
-import { getAuthenticatedUser, authConfigured } from "../../../lib/auth";
 import { hasReviewStore, publishedBlobReviews, savePendingBlob } from "../../../lib/blob-reviews";
 import { getReviewDb } from "../../../lib/reviews";
 
@@ -63,11 +62,6 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    if (authConfigured()) {
-      const user = await getAuthenticatedUser();
-      if (!user) return json({error:"Create an account or sign in before posting a review."},401);
-    }
-    // Browser-only demo accounts cannot be verified on the server.
     const sql = getReviewDb();
     if (!sql && !hasReviewStore()) {
       return json({ error: "Review submissions are temporarily unavailable." }, 503);
