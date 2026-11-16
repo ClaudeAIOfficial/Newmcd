@@ -158,17 +158,17 @@ export default function Home() {
 
       <div className="below">
         <section id="reviews" className="reviews" aria-labelledby="reviews-title">
-          <div className="review-heading"><h2 id="reviews-title">Guest reviews</h2>{listState === "ready" && <span className="count" aria-label={reviews.length + " reviews"}>{reviews.length}</span>}</div>
+          <div className="review-heading"><h2 id="reviews-title">Guest reviews</h2>{listState === "ready" && <span className="count" aria-label={reviews.length + " reviews"}>{reviews.length}</span>}</div><div className="review-filters" role="group" aria-label="Filter reviews by star rating">
+              {[0,5,4,3,2,1].map(stars => <button key={stars} type="button" className={"rating-filter" + (sampleRatingFilter === stars ? " active" : "")} aria-pressed={sampleRatingFilter === stars} onClick={() => {setSampleRatingFilter(stars);setVisibleSamples(12);}}>{stars === 0 ? "All ratings" : stars + " ★"}</button>)}
+            </div>
           <div aria-live="polite" aria-busy={listState === "loading"}>
-            {listState === "ready" && reviews.length > 0 ? <div className="review-list">{reviews.map(r => <ReviewCard key={r.id} review={r}/>)}</div>
+            {listState === "ready" && reviews.length > 0 ? <div className="review-list">{reviews.filter(r => sampleRatingFilter === 0 || r.rating === sampleRatingFilter).map(r => <ReviewCard key={r.id} review={r}/>)}</div>
             : <div className="empty"><div className="empty-icon"><Icon name="chat" size={25}/></div><div><h3>{listState === "error" ? "Reviews couldn’t load" : listState === "loading" ? "Loading reviews…" : "No published guest reviews yet"}</h3><p>{listState === "error" ? <button className="text-button" onClick={loadReviews}>Try again <Icon name="arrow" size={15}/></button> : listState === "ready" ? (acceptingReviews ? "Real guest feedback will appear here after publication." : "Review submissions will open soon.") : "Getting the latest guest feedback."}</p></div></div>}
           </div>
           <section className="sample-reviews" aria-labelledby="sample-review-title">
             <div className="sample-heading"><div><p className="sample-kicker">DESIGN PREVIEW</p><h3 id="sample-review-title">Sample reviews</h3></div><span className="sample-count">Fictional examples</span></div>
             <p className="sample-disclosure">These are fictional examples for testing the review layout, not real McDonald's customer reviews or Google Maps ratings.</p>
-            <div className="review-filters" role="group" aria-label="Filter sample reviews by star rating">
-              {[0,5,4,3,2,1].map(stars => <button key={stars} type="button" className={"rating-filter" + (sampleRatingFilter === stars ? " active" : "")} aria-pressed={sampleRatingFilter === stars} onClick={() => {setSampleRatingFilter(stars);setVisibleSamples(12);}}>{stars === 0 ? "All ratings" : stars + " ★"}</button>)}
-            </div>
+            
             <p className="filter-count" aria-live="polite">Showing {Math.min(visibleSamples,filteredSamples.length)} of {filteredSamples.length} fictional examples</p>
             <div className="review-list">{filteredSamples.slice(0,visibleSamples).map(r => <ReviewCard key={r.id} review={r} demo/>)}</div>
             {visibleSamples < filteredSamples.length && <button type="button" className="sample-more" onClick={() => setVisibleSamples(v=>Math.min(v+20,filteredSamples.length))}>Show more reviews ({filteredSamples.length-visibleSamples} remaining)</button>}
