@@ -1,3 +1,7 @@
+## Demo account mode (no Supabase required)
+
+Without `SUPABASE_URL` and `SUPABASE_ANON_KEY`, the site uses browser-only demo accounts. Accounts and salted password digests stay in that browser's local storage. Users may sign up and sign in within the same browser, then enter a receipt and submit a review. This is **not secure authentication** and is unsuitable for public customer account verification. The server cannot check demo logins; don't treat the demo as proof that a registered customer submitted a review. The site can still save reviews in its configured Vercel Blob store. For a real launch, enable Supabase authentication as described below.
+
 ## Required account registration
 
 Before publishing reviews, visitors must create an account with an email address and password, or sign in to an existing account. Account sessions use secure HttpOnly cookies. The server validates the current user with Supabase Auth before accepting a review.
