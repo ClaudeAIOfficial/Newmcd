@@ -1,4 +1,4 @@
-export type SampleReview = { id: string; name: string; rating: number; text: string; date: string; sample: true; catAvatar: boolean };
+export type SampleReview = { id: string; name: string; rating: number; text: string; date: string; sample: true; catAvatar: boolean; catVariant: 0 | 1 | 2 | 3 };
 
 const locations = ["the counter", "the dining area", "the drive-through", "the ordering kiosk", "the pickup counter"];
 const openings = [
@@ -62,7 +62,7 @@ const endings = [
 const firstNames = ["Alex","Jordan","Taylor","Morgan","Casey","Avery","Jamie","Riley","Quinn","Sam","Cameron","Drew","Parker","Charlie","Reese","Bailey","Sydney","Skyler","Rowan","Robin","Jessie","Emerson","Hayden","Elliot","Frankie","Kendall","Shawn","Dakota","Harper","Arden","Lee","Micah","Sage","Noel","Reagan","Finley","Marley","Kit","Jules","Blair","Devin","Toby","Corey","Ash","Remy","Cody","Milan","Logan","Nico","Ellis"];
 const lastNames = ["Anderson","Bennett","Carter","Davis","Edwards","Foster","Garcia","Harris","Iverson","Johnson","King","Lewis","Miller","Nelson","Ortiz","Parker","Quinn","Reed","Sullivan","Turner","Vargas","Walker","Young","Zimmerman","Brooks","Collins","Diaz","Evans","Flores","Graham","Hughes","Ingram","Jenkins","Knight","Lopez","Mitchell","Owens","Price","Rivera","Stewart"];
 
-export const sampleReviews: SampleReview[] = Array.from({ length: 1500 }, (_, i) => {
+export const sampleReviews: SampleReview[] = Array.from({ length: 1537 }, (_, i) => {
   const rating = [5, 4, 5, 3, 4, 2, 5, 4, 3, 1][i % 10];
   const place = locations[(i * 3) % locations.length];
   const text = openings[i % openings.length] + " " +
@@ -76,7 +76,8 @@ export const sampleReviews: SampleReview[] = Array.from({ length: 1500 }, (_, i)
     rating,
     text,
     date: new Date(Date.UTC(2026, 10, 16 - daysAgo, 12)).toISOString(),
-    catAvatar: i < 600,
+    catAvatar: (i * 73) % 1537 < 617,
+    catVariant: (i % 4) as 0 | 1 | 2 | 3,
     sample: true as const
   };
 });
