@@ -48,6 +48,57 @@ export default function Home() {
   const [acceptingReviews, setAcceptingReviews] = useState(false);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [listState, setListState] = useState<"loading" | "ready" | "error">("loading");
+  const accountDialog = useRef<HTMLDialogElement>(null);
+  const [account, setAccount] = useState<{id:string;email?:string}|null>(null);
+  const [accountReady, setAccountReady] = useState(false);
+  const [accountConfigured, setAccountConfigured] = useState(false);
+  const [accountMode, setAccountMode] = useState<"signup"|"login">("signup");
+  const [accountEmail, setAccountEmail] = useState("");
+  const [accountPassword, setAccountPassword] = useState("");
+  const [accountError, setAccountError] = useState("");
+  const [accountNotice, setAccountNotice] = useState("");
+  const [accountBusy, setAccountBusy] = useState(false);
+  useEffect(() => {
+    fetch("/api/auth", {cache:"no-store"})
+      .then(r => r.json())
+      .then(data => {setAccount(data.user || null);setAccountConfigured(data.configured === true);})
+      .catch(() => setAccount(null))
+      .finally(() => setAccountReady(true));
+  }, []);
+  function openAccount(mode: "signup"|"login" = "signup") {
+    setAccountMode(mode);setAccountError("");setAccountNotice("");
+    if (!accountDialog.current?.open) accountDialog.current?.showModal();
+  }
+  function showReceipt() {
+    setError(""); setShowHint(false); setPanel("receipt");
+    if (!submissionId.current) submissionId.current = crypto.randomUUID();
+    if (!dialog.current?.open) { dialog.current?.showModal();document.body.classList.add("has-dialog"); }
+  }
+  async function accountSubmit(event: FormEvent) {
+    event.preventDefault();
+    if (accountBusy) return;
+    setAccountBusy(true);setAccountError("");setAccountNotice("");
+    try {
+      const res = await fetch("/api/auth", {method:"POST",headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({action:accountMode,email:accountEmail,password:accountPassword})});
+      const data = await res.json() as {user?:{id:string;email?:string};error?:string;confirmationRequired?:boolean;message?:string};
+      if (!res.ok) throw new Error(data.error || "Couldn't sign in.");
+      if (data.confirmationRequired) {
+        setAccountNotice(data.message || "Confirm your email address, then sign in.");
+        setAccountMode("login");setAccountPassword("");
+      } else if (data.user) {
+        setAccount(data.user);setAccountPassword("");
+        accountDialog.current?.close();
+        showReceipt();
+      } else throw new Error("Please verify your email and sign in.");
+    } catch(e) {setAccountError(e instanceof Error ? e.message : "Please try again.");}
+    finally {setAccountBusy(false);}
+  }
+  async function logout() {
+    await fetch("/api/auth", {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"logout"})});
+    setAccount(null);setAccountPassword("");
+  }
+
 
   const loadReviews = useCallback(async () => {
     setListState("loading");
@@ -68,6 +119,7 @@ export default function Home() {
   }, [panel]);
 
   function openPanel(which: "help" | "receipt") {
+    if (which === "receipt" && !account) {openAccount("signup");return;}
     setError(""); setShowHint(false); setPanel(which);
     if (!submissionId.current) submissionId.current = crypto.randomUUID();
     if (!dialog.current?.open) {
@@ -113,7 +165,7 @@ export default function Home() {
     <a href="#main" className="skip-link">Skip to content</a>
     <header className="site-header"><div className="shell header-inner">
       <a className="brand" href="#main" aria-label="McDonald’s feedback home"><Arches className="header-arches" /><span>McDonald’s</span></a>
-      <nav aria-label="Main navigation"><a className="nav-link" href="#reviews">Guest reviews</a><button className="nav-link" onClick={() => openPanel("help")}>Receipt help</button><button className="nav-action" onClick={() => openPanel("receipt")}><Icon name="pencil" size={16} />Write a review</button></nav>
+      <nav aria-label="Main navigation">{account ? <button className="nav-link account-nav" onClick={logout}>Sign out</button> : <button className="nav-link account-nav" onClick={() => openAccount("login")}>Sign in</button>}<a className="nav-link" href="#reviews">Guest reviews</a><button className="nav-link" onClick={() => openPanel("help")}>Receipt help</button><button className="nav-action" onClick={() => openPanel("receipt")}><Icon name="pencil" size={16} />Write a review</button></nav>
     </div></header>
     <main id="main" className="shell">
       <section className="hero" aria-labelledby="hero-title">
@@ -177,6 +229,24 @@ export default function Home() {
           </form>}
         </>}
       </div>
+    </dialog>
+    <dialog ref={accountDialog} className="account-dialog" aria-label="Create an account or sign in">
+      <form className="dialog-content" onSubmit={accountSubmit}>
+        <button type="button" className="close" aria-label="Close" onClick={() => accountDialog.current?.close()}><Icon name="close" size={20}/></button>
+        <div className="modal-icon"><Icon name="pencil" size={25}/></div>
+        <p className="step-line">ACCOUNT REQUIRED</p>
+        <h2>{accountMode === "signup" ? "Create your account" : "Welcome back"}</h2>
+        <p className="dialog-blurb">{accountMode === "signup" ? "Create an account before sharing your feedback. You'll still need your receipt number." : "Sign in to continue with your receipt and review."}</p>
+        {!accountConfigured && accountReady ? <p className="error" role="alert">Account registration is not available yet. The site owner must connect the authentication provider.</p> : null}
+        <label htmlFor="account-email">Email address</label>
+        <input id="account-email" type="email" autoComplete="email" required maxLength={254} value={accountEmail} onChange={e=>setAccountEmail(e.target.value)} placeholder="you@example.com" />
+        <label htmlFor="account-password" style={{marginTop:16}}>Password</label>
+        <input id="account-password" type="password" minLength={8} maxLength={128} autoComplete={accountMode === "signup" ? "new-password" : "current-password"} required value={accountPassword} onChange={e=>setAccountPassword(e.target.value)} placeholder="At least 8 characters" />
+        {accountError && <p className="error" role="alert">{accountError}</p>}
+        {accountNotice && <p className="account-notice" role="status">{accountNotice}</p>}
+        <button className="primary full" type="submit" disabled={accountBusy || !accountConfigured || !accountReady}>{accountBusy ? "Please wait…" : accountMode === "signup" ? "Create account" : "Sign in"} <Icon name="arrow" size={17}/></button>
+        <p className="account-switch">{accountMode === "signup" ? "Already have an account?" : "New here?"} <button type="button" onClick={() => {setAccountMode(accountMode === "signup" ? "login" : "signup");setAccountError("");setAccountNotice("");}}>{accountMode === "signup" ? "Sign in" : "Create an account"}</button></p>
+      </form>
     </dialog>
   </>;
 }
