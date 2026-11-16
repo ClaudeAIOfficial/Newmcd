@@ -1,3 +1,16 @@
+## Required account registration
+
+Before publishing reviews, visitors must create an account with an email address and password, or sign in to an existing account. Account sessions use secure HttpOnly cookies. The server validates the current user with Supabase Auth before accepting a review.
+
+To activate sign-up and sign-in, create a Supabase project at https://supabase.com/dashboard and open **Project Settings → API**. Add these variables in **Vercel → Settings → Environment Variables** (Production, and Preview if needed):
+
+- `SUPABASE_URL` = the Supabase Project URL, e.g. `https://your-project.supabase.co`
+- `SUPABASE_ANON_KEY` = the public anon/publishable API key (never the service-role key).
+
+In **Supabase → Authentication → Providers**, enable Email. Keep email confirmation enabled and configure the project's Site URL to the Vercel/custom-domain URL. For a production launch, configure an SMTP provider so verification emails reach customers and enable CAPTCHA/rate limits. Redeploy on Vercel once the variables are set. Until then, the page stays available but creating accounts and posting reviews remain unavailable.
+
+The receipt field checks formatting only. It does not confirm that a purchase occurred.
+
 # McDonald’s guest feedback on Vercel
 
 ## Deploy
