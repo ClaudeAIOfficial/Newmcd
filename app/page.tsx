@@ -275,7 +275,7 @@ export default function Home() {
         <p className="step-line">ACCOUNT REQUIRED</p>
         <h2>{accountMode === "signup" ? "Create your account" : "Welcome back"}</h2>
         <p className="dialog-blurb">{accountMode === "signup" ? "Create an account before sharing your feedback. You'll still need your receipt number." : "Sign in to continue with your receipt and review."}</p>
-        {!accountConfigured && accountReady && <p className="field-hint">Demo account. This browser keeps your account details locally.</p>}
+        
         <label htmlFor="account-email">Email address</label>
         <input id="account-email" type="email" autoComplete="email" required maxLength={254} value={accountEmail} onChange={e=>setAccountEmail(e.target.value)} placeholder="you@example.com" />
         <label htmlFor="account-password" style={{marginTop:16}}>Password</label>
