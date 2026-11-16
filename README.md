@@ -1,21 +1,11 @@
-## Demo account mode (no Supabase required)
-
-Without `SUPABASE_URL` and `SUPABASE_ANON_KEY`, the site uses browser-only demo accounts. Accounts and salted password digests stay in that browser's local storage. Users may sign up and sign in within the same browser, then enter a receipt and submit a review. This is **not secure authentication** and is unsuitable for public customer account verification. The server cannot check demo logins; don't treat the demo as proof that a registered customer submitted a review. The site can still save reviews in its configured Vercel Blob store. For a real launch, enable Supabase authentication as described below.
-
-## Required account registration
-
-Before publishing reviews, visitors must create an account with an email address and password, or sign in to an existing account. Account sessions use secure HttpOnly cookies. The server validates the current user with Supabase Auth before accepting a review.
-
-To activate sign-up and sign-in, create a Supabase project at https://supabase.com/dashboard and open **Project Settings → API**. Add these variables in **Vercel → Settings → Environment Variables** (Production, and Preview if needed):
-
-- `SUPABASE_URL` = the Supabase Project URL, e.g. `https://your-project.supabase.co`
-- `SUPABASE_ANON_KEY` = the public anon/publishable API key (never the service-role key).
-
-In **Supabase → Authentication → Providers**, enable Email. Keep email confirmation enabled and configure the project's Site URL to the Vercel/custom-domain URL. For a production launch, configure an SMTP provider so verification emails reach customers and enable CAPTCHA/rate limits. Redeploy on Vercel once the variables are set. Until then, the page stays available but creating accounts and posting reviews remain unavailable.
-
-The receipt field checks formatting only. It does not confirm that a purchase occurred.
-
 # McDonald’s guest feedback on Vercel
+
+## Receipt-created guest profiles
+
+There is no email login, password or account registration screen. Clicking **Write a review** opens the receipt-number form. A correctly formatted number creates a temporary, anonymous guest profile for that feedback session, then opens the rating and comment step. Submissions require a receipt number, rating and comment.
+
+**Important:** Receipt numbers are format-checked only. There is no purchase database integration, identity verification, permanent user account or cross-device profile. Receipt numbers are not saved in the review records. The guest profile exists only for the current review session.
+
 
 ## Deploy
 
