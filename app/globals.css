@@ -117,3 +117,20 @@ fieldset{padding:0;border:0;margin:0 0 17px}
 .account-switch button{font-size:14px;color:#a21222;font-weight:750;text-decoration:underline;text-underline-offset:3px}
 .account-notice{font-size:14px;line-height:1.5;margin-top:14px;color:#375c25}
 @media(max-width:650px){.account-nav{display:inline-block!important;margin-right:9px;font-size:13px!important}}
+
+
+/* Cat feedback event: mascot artwork is not an individual reviewer's avatar */
+.cat-event{display:flex;align-items:center;gap:24px;margin:34px 0 5px;padding:23px 27px;background:#fff8df;border:1px solid #f6e5aa;border-radius:17px}
+.cat-event-photo{width:112px;height:112px;object-fit:cover;border-radius:20px;flex:none}
+.cat-event-content{min-width:0}
+.cat-event-eyebrow{font-size:10px;font-weight:800;letter-spacing:1.6px;color:#af1a25}
+.cat-event h2{font-size:clamp(23px,2.7vw,33px);letter-spacing:-1px;line-height:1.1;margin:7px 0}
+.cat-event-content>p:not(.cat-event-eyebrow){font-size:14px;line-height:1.5;color:#555148;max-width:670px}
+.cat-event-content a{display:inline-block;margin-top:11px;color:#8c1321;font-size:14px;font-weight:750;text-decoration:underline;text-underline-offset:3px}
+.guest-review-byline{display:flex;align-items:center;gap:10px;margin-bottom:13px}
+.guest-review-mascot{width:38px;height:38px;object-fit:cover;border-radius:50%;border:2px solid #f9da7a}
+.guest-review-byline>div{display:flex;flex-direction:column;gap:3px;min-width:0}
+.guest-review-byline strong{font-size:14px;font-weight:750}
+.guest-review-byline span{font-size:11px;color:#6a675f}
+.review-original{display:inline-block;font-size:12px;font-weight:700;margin-top:12px;text-decoration:underline;text-underline-offset:2px;color:#8c1321}
+@media(max-width:650px){.cat-event{align-items:flex-start;gap:15px;padding:16px;margin:22px 0 0}.cat-event-photo{width:76px;height:76px;border-radius:14px}.cat-event h2{font-size:22px}.cat-event-content>p:not(.cat-event-eyebrow){font-size:12px}.cat-event-content a{font-size:12px}}
