@@ -188,7 +188,6 @@ export default function Home() {
               {filteredSamples.slice(0, visibleSamples).map(r => <ReviewCard key={r.id} review={r} demo />)}
             </div>
             {visibleSamples < filteredSamples.length && <button className="sample-more" type="button" onClick={() => setVisibleSamples(v => Math.min(v+20, filteredSamples.length))}>Show more reviews ({filteredSamples.length - visibleSamples} remaining)</button>}
-            <p className="sample-footer-disclaimer">Disclaimer: the {sampleReviews.length.toLocaleString("en-US")} example reviews in this section are generated for layout testing and are not customer submissions. The count and star filters include these examples.</p>
           </section>
         </section>
         <aside className="receipt-card"><div className="receipt-copy"><h2>Got your receipt?</h2><p>You’ll need the number on it to leave a review.</p><button onClick={() => openPanel("help")} className="help-link">Find my receipt number <Icon name="arrow" size={15} /></button></div><ReceiptArt /></aside>
