@@ -28,7 +28,7 @@ function ReceiptArt() {
   return <div className="receipt-art" aria-hidden="true"><div className="paper"><Arches className="paper-arches" /><div className="paper-dash" /><div className="paper-rows"><i /><i /><i /></div><div className="order-stamp">ORDER #128</div><div className="barcode" /></div></div>;
 }
 
-type Review = { id: string; rating: number; text: string; date?: string; name?: string; source?: string; sourceUrl?: string };
+type Review = { id: string; rating: number; text: string; date?: string; name?: string; source?: string; sourceUrl?: string; catAvatar?: boolean };
 type Panel = "receipt" | "review" | "help" | "thanks";
 const ratingLabels = ["Poor", "Fair", "Okay", "Good", "Excellent"];
 const receiptPattern = /^(?=.*[a-z0-9])[a-z0-9 #./-]{1,64}$/i;
@@ -41,7 +41,7 @@ function ReviewCard({review:r,demo=false}:{review:Review;demo?:boolean}) {
     : null;
   return <article className="guest-review" aria-label={demo ? "Sample review, not real customer feedback" : undefined}>
     <div className="guest-review-byline">
-      <span className="review-avatar" aria-hidden="true">{initial}</span>
+      {demo && r.catAvatar ? <img className="review-avatar review-avatar-cat" src="/review-cat-avatar.jpg" alt="" aria-hidden="true" width="40" height="40" loading="lazy"/> : <span className="review-avatar" aria-hidden="true">{initial}</span>}
       <div><strong>{displayName}</strong>{!demo && <span>{r.source === "google" ? "Review from Google Maps" : "Guest feedback"}</span>}</div>
     </div>
     <div className="review-meta">
@@ -161,12 +161,13 @@ export default function Home() {
           <div className="review-heading"><h2 id="reviews-title">Guest reviews</h2>{listState === "ready" && <span className="count" aria-label={reviews.length + " reviews"}>{reviews.length}</span>}</div><div className="review-filters" role="group" aria-label="Filter reviews by star rating">
               {[0,5,4,3,2,1].map(stars => <button key={stars} type="button" className={"rating-filter" + (sampleRatingFilter === stars ? " active" : "")} aria-pressed={sampleRatingFilter === stars} onClick={() => {setSampleRatingFilter(stars);setVisibleSamples(12);}}>{stars === 0 ? "All ratings" : stars + " ★"}</button>)}
             </div>
-          <div aria-live="polite" aria-busy={listState === "loading"}>
-            {listState === "ready" && reviews.length > 0 ? <div className="review-list">{reviews.filter(r => sampleRatingFilter === 0 || r.rating === sampleRatingFilter).map(r => <ReviewCard key={r.id} review={r}/>)}</div>
-            : <div className="empty"><div className="empty-icon"><Icon name="chat" size={25}/></div><div><h3>{listState === "error" ? "Reviews couldn’t load" : listState === "loading" ? "Loading reviews…" : "No published guest reviews yet"}</h3><p>{listState === "error" ? <button className="text-button" onClick={loadReviews}>Try again <Icon name="arrow" size={15}/></button> : listState === "ready" ? (acceptingReviews ? "Real guest feedback will appear here after publication." : "Review submissions will open soon.") : "Getting the latest guest feedback."}</p></div></div>}
-          </div>
+          {listState === "ready" && reviews.length > 0 && (
+            <div className="review-list published-review-list" aria-live="polite">
+              {reviews.filter(r => sampleRatingFilter === 0 || r.rating === sampleRatingFilter).map(r => <ReviewCard key={r.id} review={r}/>)}
+            </div>
+          )}
           <section className="sample-reviews" aria-labelledby="sample-review-title">
-            <div className="sample-heading"><div><p className="sample-kicker">DESIGN PREVIEW</p><h3 id="sample-review-title">Sample reviews</h3></div><span className="sample-count">Fictional examples</span></div>
+            <div className="sample-heading"><div><p className="sample-kicker">DESIGN PREVIEW</p><h3 id="sample-review-title">1,500 sample reviews</h3></div><span className="sample-count">Fictional examples</span></div>
             <p className="sample-disclosure">These are fictional examples for testing the review layout, not real McDonald's customer reviews or Google Maps ratings.</p>
             
             <p className="filter-count" aria-live="polite">Showing {Math.min(visibleSamples,filteredSamples.length)} of {filteredSamples.length} fictional examples</p>
