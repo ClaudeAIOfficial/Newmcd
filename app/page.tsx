@@ -72,11 +72,19 @@ export default function Home() {
   const [guestProfile, setGuestProfile] = useState<string | null>(null);
   const [sampleRatingFilter, setSampleRatingFilter] = useState(0);
   const [visibleSamples, setVisibleSamples] = useState(12);
-  const filteredSamples = (sampleRatingFilter === 0 ? sampleReviews : sampleReviews.filter(r => r.rating === sampleRatingFilter)).slice().sort((a, b) => {
-    // Feature a few full-photo kitten avatars at the beginning of the sample section.
-    const featured = (r: typeof a) => r.catAvatar && (r.catVariant === 0 || r.catVariant === 2) ? 0 : 1;
-    return featured(a) - featured(b);
-  });
+  const filteredSamples = (() => {
+    const matching = sampleRatingFilter === 0 ? sampleReviews : sampleReviews.filter(r => r.rating === sampleRatingFilter);
+    // Rotate through ordinary initials, close-up cat photos, and full kitten photos.
+    const ordinary = matching.filter(r => !r.catAvatar);
+    const closeUp = matching.filter(r => r.catAvatar && (r.catVariant === 1 || r.catVariant === 3));
+    const fullPhoto = matching.filter(r => r.catAvatar && (r.catVariant === 0 || r.catVariant === 2));
+    const groups = [ordinary, fullPhoto, closeUp];
+    const mixed: typeof matching = [];
+    for (let i = 0; mixed.length < matching.length; i++) {
+      for (const group of groups) if (i < group.length) mixed.push(group[i]);
+    }
+    return mixed;
+  })();
   const allReviewCount = reviews.length + sampleReviews.length;
   const countForStars = (stars: number) => stars === 0 ? allReviewCount :
     reviews.filter(r => r.rating === stars).length + sampleReviews.filter(r => r.rating === stars).length;
