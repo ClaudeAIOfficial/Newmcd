@@ -66,10 +66,10 @@ export const sampleReviews: SampleReview[] = Array.from({ length: 500 }, (_, i) 
     observations[(i * 7 + Math.floor(i / 20)) % observations.length] + " " +
     (i % 4 === 0 ? "I spent a few minutes near " + place + ". " : "") +
     endings[(i * 3 + Math.floor(i / 10)) % endings.length];
-  const daysAgo = 5 + (i * 13) % 720;
+  const daysAgo = (i * 7 + Math.floor(i / 20)) % 30;
   return {
     id: "sample-" + (i + 1),
-    name: "Demo Guest " + String(i + 1).padStart(3, "0"),
+    name: "Guest " + String(i + 1).padStart(3, "0"),
     rating,
     text,
     date: new Date(Date.UTC(2026, 10, 16 - daysAgo, 12)).toISOString(),
