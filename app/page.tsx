@@ -27,7 +27,7 @@ function ReceiptArt() {
   return <div className="receipt-art" aria-hidden="true"><div className="paper"><Arches className="paper-arches" /><div className="paper-dash" /><div className="paper-rows"><i /><i /><i /></div><div className="order-stamp">ORDER #128</div><div className="barcode" /></div></div>;
 }
 
-type Review = { id: string; rating: number; text: string; date?: string };
+type Review = { id: string; rating: number; text: string; date?: string; name?: string; source?: string; sourceUrl?: string };
 type Panel = "receipt" | "review" | "help" | "thanks";
 const ratingLabels = ["Poor", "Fair", "Okay", "Good", "Excellent"];
 const receiptPattern = /^(?=.*[a-z0-9])[a-z0-9 #./-]{1,64}$/i;
@@ -132,11 +132,21 @@ export default function Home() {
         <div className="meal-image"><img src="/meal.webp" alt="Golden fries in a red McDonald’s carton beside a cheeseburger" fetchPriority="high" width="1400" height="1120" /></div>
       </section>
 
+      <section className="cat-event" aria-label="Cat-themed feedback event">
+        <img className="cat-event-photo" src="/cat-event-avatar.jpg" alt="Orange kitten wearing a McDonald’s uniform and hat, the event mascot" width="96" height="96"/>
+        <div className="cat-event-content"><p className="cat-event-eyebrow">SPECIAL FEEDBACK EVENT</p><h2>Meet our little review buddy.</h2><p>Our kitten mascot is cheering on every guest who shares their experience. The cat image represents the event, not the identity of individual reviewers.</p><a href="https://www.google.com/maps?ftid=0x865f8db3601fd491:0xf5bfd5ca98243fd2" target="_blank" rel="noopener noreferrer">Read original reviews on Google Maps <span aria-hidden="true">↗</span></a></div>
+      </section>
+
       <div className="below">
         <section id="reviews" className="reviews" aria-labelledby="reviews-title">
           <div className="review-heading"><h2 id="reviews-title">Guest reviews</h2>{listState === "ready" && <span className="count" aria-label={reviews.length + " reviews"}>{reviews.length}</span>}</div>
           <div aria-live="polite" aria-busy={listState === "loading"}>
-            {listState === "ready" && reviews.length > 0 ? <div className="review-list">{reviews.map(r => <article className="guest-review" key={r.id}><div className="review-meta"><span className="public-stars" aria-label={r.rating + " out of 5 stars"}>{[1,2,3,4,5].map(n => <Icon name="star" key={n} size={17} filled={n <= r.rating} />)}</span>{r.date && <time dateTime={r.date}>{new Intl.DateTimeFormat("en", {year:"numeric",month:"short",day:"numeric",timeZone:"UTC"}).format(new Date(r.date))}</time>}</div><p>{r.text}</p></article>)}</div>
+            {listState === "ready" && reviews.length > 0 ? <div className="review-list">{reviews.map(r => <article className="guest-review" key={r.id}>
+        <div className="guest-review-byline">
+          <img className="guest-review-mascot" src="/cat-event-avatar.jpg" alt="" aria-hidden="true" width="38" height="38"/>
+          <div><strong>{r.name || "Guest review"}</strong><span>Event mascot avatar · {r.source === "google" ? "Review originally on Google" : "Guest feedback"}</span></div>
+        </div>
+        <div className="review-meta"><span className="public-stars" aria-label={r.rating + " out of 5 stars"}>{[1,2,3,4,5].map(n => <Icon name="star" key={n} size={17} filled={n <= r.rating} />)}</span>{r.date && <time dateTime={r.date}>{new Intl.DateTimeFormat("en", {year:"numeric",month:"short",day:"numeric",timeZone:"UTC"}).format(new Date(r.date))}</time>}</div><p>{r.text}</p>{r.source === "google" && r.sourceUrl && <a className="review-original" href={r.sourceUrl} target="_blank" rel="noopener noreferrer">View original on Google ↗</a>}</article>)}</div>
             : <div className="empty"><div className="empty-icon"><Icon name="chat" size={25} /></div><div><h3>{listState === "error" ? "Reviews couldn’t load" : listState === "loading" ? "Loading reviews…" : "No reviews yet"}</h3><p>{listState === "error" ? <button className="text-button" onClick={loadReviews}>Try again <Icon name="arrow" size={15}/></button> : listState === "ready" ? (acceptingReviews ? "Be the first to share how your visit went." : "Review submissions will open soon.") : "Getting the latest guest feedback."}</p></div></div>}
           </div>
         </section>
