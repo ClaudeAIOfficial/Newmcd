@@ -63,9 +63,11 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    if (!authConfigured()) return json({error:"Account registration is not configured yet."},503);
-    const user = await getAuthenticatedUser();
-    if (!user) return json({error:"Create an account or sign in before posting a review."},401);
+    if (authConfigured()) {
+      const user = await getAuthenticatedUser();
+      if (!user) return json({error:"Create an account or sign in before posting a review."},401);
+    }
+    // Browser-only demo accounts cannot be verified on the server.
     const sql = getReviewDb();
     if (!sql && !hasReviewStore()) {
       return json({ error: "Review submissions are temporarily unavailable." }, 503);
