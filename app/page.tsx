@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import FeedbackFooter from "./FeedbackFooter";
+import { sampleReviews } from "../lib/sample-reviews";
 
 type IconName = "arrow" | "pencil" | "receipt" | "chat" | "close" | "check" | "back" | "star";
 function Icon({ name, size = 20, filled = false }: { name: IconName; size?: number; filled?: boolean }) {
@@ -32,6 +33,27 @@ type Panel = "receipt" | "review" | "help" | "thanks";
 const ratingLabels = ["Poor", "Fair", "Okay", "Good", "Excellent"];
 const receiptPattern = /^(?=.*[a-z0-9])[a-z0-9 #./-]{1,64}$/i;
 
+function ReviewCard({review:r,demo=false}:{review:Review;demo?:boolean}) {
+  const displayName = demo ? r.name || "Demo Guest" : r.name || "Guest";
+  const initial = displayName.charAt(0).toUpperCase();
+  const safeDate = r.date && !Number.isNaN(new Date(r.date).valueOf())
+    ? new Intl.DateTimeFormat("en", {year:"numeric",month:"short",day:"numeric",timeZone:"UTC"}).format(new Date(r.date))
+    : null;
+  return <article className="guest-review" aria-label={demo ? "Sample review, not real customer feedback" : undefined}>
+    <div className="guest-review-byline">
+      <span className="review-avatar" aria-hidden="true">{initial}</span>
+      <div><strong>{displayName}</strong><span>{demo ? "Sample profile · Fictional review" : r.source === "google" ? "Review from Google Maps" : "Guest feedback"}</span></div>
+    </div>
+    <div className="review-meta">
+      <span className="public-stars" aria-label={r.rating + " out of 5 stars"}>{[1,2,3,4,5].map(n => <Icon name="star" key={n} size={17} filled={n <= r.rating}/>)}</span>
+      {safeDate && <time dateTime={r.date}>{safeDate}</time>}
+      {demo && <span className="review-demo-label">DEMO</span>}
+    </div>
+    <p>{r.text}</p>
+    {r.source === "google" && r.sourceUrl && <a className="review-original" href={r.sourceUrl} target="_blank" rel="noopener noreferrer">View original on Google ↗</a>}
+  </article>;
+}
+
 export default function Home() {
   const dialog = useRef<HTMLDialogElement>(null);
   const heading = useRef<HTMLHeadingElement>(null);
@@ -49,6 +71,7 @@ export default function Home() {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [listState, setListState] = useState<"loading" | "ready" | "error">("loading");
   const [guestProfile, setGuestProfile] = useState<string | null>(null);
+  const [visibleSamples, setVisibleSamples] = useState(12);
 
   const loadReviews = useCallback(async () => {
     setListState("loading");
@@ -136,14 +159,15 @@ export default function Home() {
         <section id="reviews" className="reviews" aria-labelledby="reviews-title">
           <div className="review-heading"><h2 id="reviews-title">Guest reviews</h2>{listState === "ready" && <span className="count" aria-label={reviews.length + " reviews"}>{reviews.length}</span>}</div>
           <div aria-live="polite" aria-busy={listState === "loading"}>
-            {listState === "ready" && reviews.length > 0 ? <div className="review-list">{reviews.map(r => <article className="guest-review" key={r.id}>
-        <div className="guest-review-byline">
-          <img className="guest-review-mascot" src="/cat-event-avatar.jpg" alt="" aria-hidden="true" width="38" height="38"/>
-          <div><strong>{r.name || "Guest review"}</strong><span>Event mascot avatar · {r.source === "google" ? "Review originally on Google" : "Guest feedback"}</span></div>
-        </div>
-        <div className="review-meta"><span className="public-stars" aria-label={r.rating + " out of 5 stars"}>{[1,2,3,4,5].map(n => <Icon name="star" key={n} size={17} filled={n <= r.rating} />)}</span>{r.date && <time dateTime={r.date}>{new Intl.DateTimeFormat("en", {year:"numeric",month:"short",day:"numeric",timeZone:"UTC"}).format(new Date(r.date))}</time>}</div><p>{r.text}</p>{r.source === "google" && r.sourceUrl && <a className="review-original" href={r.sourceUrl} target="_blank" rel="noopener noreferrer">View original on Google ↗</a>}</article>)}</div>
-            : <div className="empty"><div className="empty-icon"><Icon name="chat" size={25} /></div><div><h3>{listState === "error" ? "Reviews couldn’t load" : listState === "loading" ? "Loading reviews…" : "No reviews yet"}</h3><p>{listState === "error" ? <button className="text-button" onClick={loadReviews}>Try again <Icon name="arrow" size={15}/></button> : listState === "ready" ? (acceptingReviews ? "Be the first to share how your visit went." : "Review submissions will open soon.") : "Getting the latest guest feedback."}</p></div></div>}
+            {listState === "ready" && reviews.length > 0 ? <div className="review-list">{reviews.map(r => <ReviewCard key={r.id} review={r}/>)}</div>
+            : <div className="empty"><div className="empty-icon"><Icon name="chat" size={25}/></div><div><h3>{listState === "error" ? "Reviews couldn’t load" : listState === "loading" ? "Loading reviews…" : "No published guest reviews yet"}</h3><p>{listState === "error" ? <button className="text-button" onClick={loadReviews}>Try again <Icon name="arrow" size={15}/></button> : listState === "ready" ? (acceptingReviews ? "Real guest feedback will appear here after publication." : "Review submissions will open soon.") : "Getting the latest guest feedback."}</p></div></div>}
           </div>
+          <section className="sample-reviews" aria-labelledby="sample-review-title">
+            <div className="sample-heading"><div><p className="sample-kicker">DESIGN PREVIEW</p><h3 id="sample-review-title">500 sample reviews</h3></div><span className="sample-count">Demo content</span></div>
+            <p className="sample-disclosure">These are fictional examples for testing the review layout, not real McDonald's customer reviews or Google Maps ratings.</p>
+            <div className="review-list">{sampleReviews.slice(0,visibleSamples).map(r => <ReviewCard key={r.id} review={r} demo/>)}</div>
+            {visibleSamples < sampleReviews.length && <button type="button" className="sample-more" onClick={() => setVisibleSamples(v=>Math.min(v+20,sampleReviews.length))}>Show more sample reviews ({sampleReviews.length-visibleSamples} remaining)</button>}
+          </section>
         </section>
         <aside className="receipt-card"><div className="receipt-copy"><h2>Got your receipt?</h2><p>You’ll need the number on it to leave a review.</p><button onClick={() => openPanel("help")} className="help-link">Find my receipt number <Icon name="arrow" size={15} /></button></div><ReceiptArt /></aside>
       </div>
