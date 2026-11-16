@@ -48,95 +48,7 @@ export default function Home() {
   const [acceptingReviews, setAcceptingReviews] = useState(false);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [listState, setListState] = useState<"loading" | "ready" | "error">("loading");
-  const accountDialog = useRef<HTMLDialogElement>(null);
-  const [account, setAccount] = useState<{id:string;email?:string}|null>(null);
-  const [accountReady, setAccountReady] = useState(false);
-  const [accountConfigured, setAccountConfigured] = useState(false);
-  const [accountMode, setAccountMode] = useState<"signup"|"login">("signup");
-  const [accountEmail, setAccountEmail] = useState("");
-  const [accountPassword, setAccountPassword] = useState("");
-  const [accountError, setAccountError] = useState("");
-  const [accountNotice, setAccountNotice] = useState("");
-  const [accountBusy, setAccountBusy] = useState(false);
-  useEffect(() => {
-    fetch("/api/auth", {cache:"no-store"})
-      .then(r => r.json())
-      .then(data => {
-        const configured = data.configured === true;
-        setAccountConfigured(configured);
-        if (configured) setAccount(data.user || null);
-        else {
-          try {
-            const saved = localStorage.getItem("guest-feedback-demo-session");
-            if (saved) setAccount({id:saved,email:saved});
-          } catch { /* Storage can be disabled */ }
-        }
-      })
-      .catch(() => setAccount(null))
-      .finally(() => setAccountReady(true));
-  }, []);
-  function openAccount(mode: "signup"|"login" = "signup") {
-    setAccountMode(mode);setAccountError("");setAccountNotice("");
-    if (!accountDialog.current?.open) accountDialog.current?.showModal();
-  }
-  function showReceipt() {
-    setError(""); setShowHint(false); setPanel("receipt");
-    if (!submissionId.current) submissionId.current = crypto.randomUUID();
-    if (!dialog.current?.open) { dialog.current?.showModal();document.body.classList.add("has-dialog"); }
-  }
-  async function demoDigest(email: string, password: string, salt: string) {
-    const bytes = new TextEncoder().encode(`${salt}:${email}:${password}`);
-    const buffer = await crypto.subtle.digest("SHA-256", bytes);
-    return Array.from(new Uint8Array(buffer), b => b.toString(16).padStart(2,"0")).join("");
-  }
-  async function demoLogin() {
-    const email = accountEmail.trim().toLowerCase();
-    const key = "guest-feedback-demo-account:" + email;
-    const raw = localStorage.getItem(key);
-    if (accountMode === "signup") {
-      if (raw) throw new Error("This email already has a demo account. Please sign in.");
-      const salt = crypto.randomUUID();
-      const digest = await demoDigest(email,accountPassword,salt);
-      localStorage.setItem(key,JSON.stringify({salt,digest}));
-    } else {
-      if (!raw) throw new Error("No demo account exists for that email. Create one first.");
-      let record: {salt:string;digest:string};
-      try {record = JSON.parse(raw);} catch {throw new Error("Unable to read this demo account.");}
-      if (await demoDigest(email,accountPassword,record.salt) !== record.digest) throw new Error("Incorrect password.");
-    }
-    localStorage.setItem("guest-feedback-demo-session",email);
-    setAccount({id:email,email});
-    setAccountPassword("");
-    accountDialog.current?.close();
-    showReceipt();
-  }
-  async function accountSubmit(event: FormEvent) {
-    event.preventDefault();
-    if (accountBusy) return;
-    setAccountBusy(true);setAccountError("");setAccountNotice("");
-    try {
-      if (!accountConfigured) {await demoLogin(); return;}
-      const res = await fetch("/api/auth", {method:"POST",headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({action:accountMode,email:accountEmail,password:accountPassword})});
-      const data = await res.json() as {user?:{id:string;email?:string};error?:string;confirmationRequired?:boolean;message?:string};
-      if (!res.ok) throw new Error(data.error || "Couldn't sign in.");
-      if (data.confirmationRequired) {
-        setAccountNotice(data.message || "Confirm your email address, then sign in.");
-        setAccountMode("login");setAccountPassword("");
-      } else if (data.user) {
-        setAccount(data.user);setAccountPassword("");
-        accountDialog.current?.close();
-        showReceipt();
-      } else throw new Error("Please verify your email and sign in.");
-    } catch(e) {setAccountError(e instanceof Error ? e.message : "Please try again.");}
-    finally {setAccountBusy(false);}
-  }
-  async function logout() {
-    if (!accountConfigured) {localStorage.removeItem("guest-feedback-demo-session");setAccount(null);setAccountPassword("");return;}
-    await fetch("/api/auth", {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"logout"})});
-    setAccount(null);setAccountPassword("");
-  }
-
+  const [guestProfile, setGuestProfile] = useState<string | null>(null);
 
   const loadReviews = useCallback(async () => {
     setListState("loading");
@@ -157,7 +69,6 @@ export default function Home() {
   }, [panel]);
 
   function openPanel(which: "help" | "receipt") {
-    if (which === "receipt" && !account) {openAccount("signup");return;}
     setError(""); setShowHint(false); setPanel(which);
     if (!submissionId.current) submissionId.current = crypto.randomUUID();
     if (!dialog.current?.open) {
@@ -173,11 +84,16 @@ export default function Home() {
       receiptField.current?.focus();
       return;
     }
+    // A receipt creates a temporary guest profile for this feedback session.
+    // We do not store the receipt in local storage or claim to verify a purchase.
+    const profileId = crypto.randomUUID();
+    setGuestProfile(profileId);
     setReceipt(receipt.trim()); setError(""); setPanel("review");
   }
   async function submit(event: FormEvent) {
     event.preventDefault();
     if (sendingRef.current) return;
+    if (!guestProfile || !receiptPattern.test(receipt.trim())) { setError("Enter a receipt number to create a guest profile."); setPanel("receipt"); return; }
     if (!rating || !text.trim()) {
       setError(!rating ? "Choose a star rating for your visit." : "Write a few words about your visit.");
       return;
@@ -192,7 +108,7 @@ export default function Home() {
         const data = await res.json().catch(() => ({})) as { error?: string };
         throw new Error(data.error || "Your review didn’t go through. Please try again.");
       }
-      setReceipt(""); setText(""); setRating(0); submissionId.current = "";
+      setReceipt(""); setText(""); setRating(0); setGuestProfile(null); submissionId.current = "";
       setPanel("thanks");
     } catch (reason) {
       setError(reason instanceof TypeError ? "Check your connection and try again. Your review is still here." : (reason as Error).message);
@@ -203,7 +119,7 @@ export default function Home() {
     <a href="#main" className="skip-link">Skip to content</a>
     <header className="site-header"><div className="shell header-inner">
       <a className="brand" href="#main" aria-label="McDonald’s feedback home"><Arches className="header-arches" /><span>McDonald’s</span></a>
-      <nav aria-label="Main navigation">{account ? <button className="nav-link account-nav" onClick={logout}>Sign out</button> : <button className="nav-link account-nav" onClick={() => openAccount("login")}>Sign in</button>}<a className="nav-link" href="#reviews">Guest reviews</a><button className="nav-link" onClick={() => openPanel("help")}>Receipt help</button><button className="nav-action" onClick={() => openPanel("receipt")}><Icon name="pencil" size={16} />Write a review</button></nav>
+      <nav aria-label="Main navigation"><a className="nav-link" href="#reviews">Guest reviews</a><button className="nav-link" onClick={() => openPanel("help")}>Receipt help</button><button className="nav-action" onClick={() => openPanel("receipt")}><Icon name="pencil" size={16} />Write a review</button></nav>
     </div></header>
     <main id="main" className="shell">
       <section className="hero" aria-labelledby="hero-title">
@@ -250,7 +166,7 @@ export default function Home() {
           <div className="step-line"><Icon name={panel === "receipt" ? "receipt" : "pencil"} size={17} /><span>Step {panel === "receipt" ? "1" : "2"} of 2</span></div>
           <h2 tabIndex={-1} ref={heading} id="dialog-title">{panel === "receipt" ? "Have your receipt handy?" : "How was your visit?"}</h2>
           {panel === "receipt" ? <form onSubmit={advance}>
-            <p className="dialog-blurb">Start with the number on your printed or digital receipt.</p>
+            <p className="dialog-blurb">Enter the number on your receipt to create a guest profile and continue.</p>
             <label htmlFor="receipt-number">Receipt number</label><input id="receipt-number" ref={receiptField} value={receipt} required maxLength={64} autoComplete="off" placeholder="e.g. 128" aria-describedby="receipt-privacy" onChange={e => { setReceipt(e.target.value); setError(""); }} />
             <p id="receipt-privacy" className="field-hint">Your receipt number stays private.</p>
             <button type="button" className="text-button" aria-expanded={showHint} onClick={() => setShowHint(!showHint)}>Where do I find it?</button>
@@ -258,7 +174,7 @@ export default function Home() {
             {error && <p className="error" role="alert">{error}</p>}
             <button className="primary full" type="submit">Continue <Icon name="arrow" size={18}/></button>
           </form> : <form onSubmit={submit}>
-            <p className="dialog-blurb">Give your visit a rating and tell us what stood out.</p>
+            <p className="dialog-blurb">Your guest profile is ready. Give your visit a rating and tell us what stood out.</p>
             <fieldset disabled={sending}><legend>Your rating</legend><div className="rating">{ratingLabels.map((label, i) => <label className={"star-choice" + (rating >= i+1 ? " selected" : "")} key={label}><input type="radio" name="rating" required value={i+1} aria-label={i+1 + (i === 0 ? " star, " : " stars, ") + label} checked={rating === i+1} onChange={() => {setRating(i+1);setError("");}} /><Icon name="star" size={32} filled={rating >= i+1} /></label>)}</div><p className="rating-label">{rating ? ratingLabels[rating-1] : "Select a rating"}</p></fieldset>
             <label htmlFor="review-text">Your review</label><textarea id="review-text" required maxLength={2000} rows={4} disabled={sending} value={text} onChange={e => {setText(e.target.value);setError("");}} placeholder="What would you like us to know?" />
             <span className="character-count">{text.length.toLocaleString()} / 2,000</span>
@@ -267,24 +183,6 @@ export default function Home() {
           </form>}
         </>}
       </div>
-    </dialog>
-    <dialog ref={accountDialog} className="account-dialog" aria-label="Create an account or sign in">
-      <form className="dialog-content" onSubmit={accountSubmit}>
-        <button type="button" className="close" aria-label="Close" onClick={() => accountDialog.current?.close()}><Icon name="close" size={20}/></button>
-        <div className="modal-icon"><Icon name="pencil" size={25}/></div>
-        <p className="step-line">ACCOUNT REQUIRED</p>
-        <h2>{accountMode === "signup" ? "Create your account" : "Welcome back"}</h2>
-        <p className="dialog-blurb">{accountMode === "signup" ? "Create an account before sharing your feedback. You'll still need your receipt number." : "Sign in to continue with your receipt and review."}</p>
-        
-        <label htmlFor="account-email">Email address</label>
-        <input id="account-email" type="email" autoComplete="email" required maxLength={254} value={accountEmail} onChange={e=>setAccountEmail(e.target.value)} placeholder="you@example.com" />
-        <label htmlFor="account-password" style={{marginTop:16}}>Password</label>
-        <input id="account-password" type="password" minLength={8} maxLength={128} autoComplete={accountMode === "signup" ? "new-password" : "current-password"} required value={accountPassword} onChange={e=>setAccountPassword(e.target.value)} placeholder="At least 8 characters" />
-        {accountError && <p className="error" role="alert">{accountError}</p>}
-        {accountNotice && <p className="account-notice" role="status">{accountNotice}</p>}
-        <button className="primary full" type="submit" disabled={accountBusy || !accountReady}>{accountBusy ? "Please wait…" : accountMode === "signup" ? "Create account" : "Sign in"} <Icon name="arrow" size={17}/></button>
-        <p className="account-switch">{accountMode === "signup" ? "Already have an account?" : "New here?"} <button type="button" onClick={() => {setAccountMode(accountMode === "signup" ? "login" : "signup");setAccountError("");setAccountNotice("");}}>{accountMode === "signup" ? "Sign in" : "Create an account"}</button></p>
-      </form>
     </dialog>
   </>;
 }
