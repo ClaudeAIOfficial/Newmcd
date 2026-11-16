@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import FeedbackFooter from "./FeedbackFooter";
+import { sampleReviews } from "../lib/sample-reviews";
 
 type IconName = "arrow" | "pencil" | "receipt" | "chat" | "close" | "check" | "back" | "star";
 function Icon({ name, size = 20, filled = false }: { name: IconName; size?: number; filled?: boolean }) {
@@ -27,7 +28,7 @@ function ReceiptArt() {
   return <div className="receipt-art" aria-hidden="true"><div className="paper"><Arches className="paper-arches" /><div className="paper-dash" /><div className="paper-rows"><i /><i /><i /></div><div className="order-stamp">ORDER #128</div><div className="barcode" /></div></div>;
 }
 
-type Review = { id: string; rating: number; text: string; date?: string; name?: string; source?: string; sourceUrl?: string; catAvatar?: boolean };
+type Review = { id: string; rating: number; text: string; date?: string; name?: string; source?: string; sourceUrl?: string; catAvatar?: boolean; catVariant?: 0 | 1 | 2 | 3 };
 type Panel = "receipt" | "review" | "help" | "thanks";
 const ratingLabels = ["Poor", "Fair", "Okay", "Good", "Excellent"];
 const receiptPattern = /^(?=.*[a-z0-9])[a-z0-9 #./-]{1,64}$/i;
@@ -40,7 +41,7 @@ function ReviewCard({review:r,demo=false}:{review:Review;demo?:boolean}) {
     : null;
   return <article className="guest-review" aria-label={demo ? "Sample review, not real customer feedback" : undefined}>
     <div className="guest-review-byline">
-      {demo && r.catAvatar ? <img className="review-avatar review-avatar-cat" src="/review-cat-avatar.jpg" alt="" aria-hidden="true" width="40" height="40" loading="lazy"/> : <span className="review-avatar" aria-hidden="true">{initial}</span>}
+      {demo && r.catAvatar ? <img className={`review-avatar review-avatar-cat variant-${r.catVariant ?? 0}`} src="/review-cat-avatar.jpg" alt="" aria-hidden="true" width="40" height="40" loading="lazy"/> : <span className="review-avatar" aria-hidden="true">{initial}</span>}
       <div><strong>{displayName}</strong>{!demo && <span>{r.source === "google" ? "Review from Google Maps" : "Guest feedback"}</span>}</div>
     </div>
     <div className="review-meta">
@@ -70,6 +71,11 @@ export default function Home() {
   const [listState, setListState] = useState<"loading" | "ready" | "error">("loading");
   const [guestProfile, setGuestProfile] = useState<string | null>(null);
   const [sampleRatingFilter, setSampleRatingFilter] = useState(0);
+  const [visibleSamples, setVisibleSamples] = useState(12);
+  const filteredSamples = sampleRatingFilter === 0 ? sampleReviews : sampleReviews.filter(r => r.rating === sampleRatingFilter);
+  const allReviewCount = reviews.length + sampleReviews.length;
+  const countForStars = (stars: number) => stars === 0 ? allReviewCount :
+    reviews.filter(r => r.rating === stars).length + sampleReviews.filter(r => r.rating === stars).length;
 
   const loadReviews = useCallback(async () => {
     setListState("loading");
@@ -155,8 +161,8 @@ export default function Home() {
 
       <div className="below">
         <section id="reviews" className="reviews" aria-labelledby="reviews-title">
-          <div className="review-heading"><h2 id="reviews-title">Guest reviews</h2>{listState === "ready" && <span className="count" aria-label={reviews.length + " reviews"}>{reviews.length}</span>}</div><div className="review-filters" role="group" aria-label="Filter reviews by star rating">
-              {[0,5,4,3,2,1].map(stars => <button key={stars} type="button" className={"rating-filter" + (sampleRatingFilter === stars ? " active" : "")} aria-pressed={sampleRatingFilter === stars} onClick={() => {setSampleRatingFilter(stars);}}>{stars === 0 ? "All ratings" : stars + " ★"} <span className="rating-filter-count">{stars === 0 ? reviews.length : reviews.filter(r => r.rating === stars).length}</span></button>)}
+          <div className="review-heading"><h2 id="reviews-title">Guest reviews</h2><span className="count" aria-label={allReviewCount + " entries including generated examples"}>{allReviewCount.toLocaleString("en-US")}</span></div><div className="review-filters" role="group" aria-label="Filter reviews by star rating">
+              {[0,5,4,3,2,1].map(stars => <button key={stars} type="button" className={"rating-filter" + (sampleRatingFilter === stars ? " active" : "")} aria-pressed={sampleRatingFilter === stars} onClick={() => {setSampleRatingFilter(stars);setVisibleSamples(12);}}>{stars === 0 ? "All ratings" : stars + " ★"} <span className="rating-filter-count">{countForStars(stars)}</span></button>)}
             </div>
           {listState === "ready" && reviews.length > 0 && (
             <div className="review-list published-review-list" aria-live="polite">
@@ -164,6 +170,14 @@ export default function Home() {
             </div>
           )}
 
+
+          <section className="sample-reviews" aria-label="Generated example reviews">
+            <div className="review-list" aria-live="polite">
+              {filteredSamples.slice(0, visibleSamples).map(r => <ReviewCard key={r.id} review={r} demo />)}
+            </div>
+            {visibleSamples < filteredSamples.length && <button className="sample-more" type="button" onClick={() => setVisibleSamples(v => Math.min(v+20, filteredSamples.length))}>Show more reviews ({filteredSamples.length - visibleSamples} remaining)</button>}
+            <p className="sample-footer-disclaimer">Disclaimer: the {sampleReviews.length.toLocaleString("en-US")} example reviews in this section are generated for layout testing and are not customer submissions. The count and star filters include these examples.</p>
+          </section>
         </section>
         <aside className="receipt-card"><div className="receipt-copy"><h2>Got your receipt?</h2><p>You’ll need the number on it to leave a review.</p><button onClick={() => openPanel("help")} className="help-link">Find my receipt number <Icon name="arrow" size={15} /></button></div><ReceiptArt /></aside>
       </div>
