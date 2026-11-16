@@ -1,0 +1,166 @@
+{
+  "columns": [
+    {
+      "heading": "Families",
+      "links": [
+        {
+          "label": "Families",
+          "href": "https://www.mcdonalds.com/de/de-de/familien.html"
+        },
+        {
+          "label": "Happy Meal®",
+          "href": "https://www.mcdonalds.com/de/de-de/familien/happy-meal.html"
+        },
+        {
+          "label": "Toys",
+          "href": "https://www.mcdonalds.com/de/de-de/familien/happy-meal/spielzeug.html"
+        },
+        {
+          "label": "Kids’ Birthday Parties",
+          "href": "https://www.mcdonalds.com/de/de-de/familien/kindergeburtstag.html"
+        }
+      ]
+    },
+    {
+      "heading": "About Us",
+      "links": [
+        {
+          "label": "Our History",
+          "href": "https://www.mcdonalds.com/de/de-de/ueber-uns/geschichte.html"
+        },
+        {
+          "label": "Executive Board",
+          "href": "https://www.mcdonalds.com/de/de-de/ueber-uns/vorstand.html"
+        },
+        {
+          "label": "Our Responsibility",
+          "href": "https://www.mcdonalds.com/de/de-de/unsere-verantwortung.html"
+        },
+        {
+          "label": "VIP Card for Bus Drivers",
+          "href": "https://www.mcdonalds.com/de/de-de/ueber-uns/drivers-vip-card-busfahrer.html"
+        },
+        {
+          "label": "Franchising",
+          "href": "https://franchise.mcdonalds.de/"
+        },
+        {
+          "label": "Newsletter",
+          "href": "https://www.mcdonalds.com/de/de-de/newsletter.html"
+        }
+      ]
+    },
+    {
+      "heading": "Contact",
+      "links": [
+        {
+          "label": "Contact Us",
+          "href": "https://www.mcdonalds.com/de/de-de/kontakt.html"
+        },
+        {
+          "label": "Press & Media Center",
+          "href": "https://www.mcdonalds.com/de/de-de/GermanyNewsroom.html"
+        },
+        {
+          "label": "Current Alerts",
+          "href": "https://www.mcdonalds.com/de/de-de/aktuelle-warnungen.html"
+        }
+      ]
+    },
+    {
+      "heading": "Careers",
+      "links": [
+        {
+          "label": "Careers",
+          "href": "https://karriere.mcdonalds.de/"
+        },
+        {
+          "label": "Restaurant Jobs",
+          "href": "https://karriere.mcdonalds.de/jobangebote/15/?title=Restaurant-Mitarbeiter%3Ain"
+        },
+        {
+          "label": "Restaurant Management Jobs",
+          "href": "https://karriere.mcdonalds.de/jobangebote/9/?title=Schichtf%C3%BChrer%3Ain"
+        },
+        {
+          "label": "Mini-Jobs",
+          "href": "https://karriere.mcdonalds.de/jobangebote/15/all/?title=Restaurant-Mitarbeiter%3Ain"
+        },
+        {
+          "label": "Apprenticeships",
+          "href": "https://karriere.mcdonalds.de/ausbildung-und-duales-studium/"
+        },
+        {
+          "label": "Dual Study Programs",
+          "href": "https://karriere.mcdonalds.de/ausbildung-und-duales-studium"
+        },
+        {
+          "label": "Administrative Jobs",
+          "href": "https://karriere.mcdonalds.de/jobangebote/?filters=ADMINISTRATION_POSITION"
+        }
+      ]
+    }
+  ],
+  "social": [
+    {
+      "label": "Facebook",
+      "href": "https://www.facebook.com/mcd"
+    },
+    {
+      "label": "Instagram",
+      "href": "https://www.instagram.com/mcdonaldsde/"
+    },
+    {
+      "label": "YouTube",
+      "href": "https://www.youtube.com/user/mcdonaldsDE"
+    },
+    {
+      "label": "X",
+      "href": "https://twitter.com/McDonaldsDENews"
+    },
+    {
+      "label": "TikTok",
+      "href": "https://www.tiktok.com/@mcdonaldsde"
+    },
+    {
+      "label": "LinkedIn",
+      "href": "https://www.linkedin.com/company/mcdonaldsdeutschland/"
+    }
+  ],
+  "stores": [
+    {
+      "label": "App Store",
+      "href": "https://apps.apple.com/de/app/mcdonalds-deutschland/id524943492"
+    },
+    {
+      "label": "Google Play",
+      "href": "https://play.google.com/store/apps/details?id=de.mcdonalds.mcdonaldsinfoapp&hl=de"
+    }
+  ],
+  "legal": [
+    {
+      "label": "Privacy Policy",
+      "href": "https://www.mcdonalds.com/de/de-de/datenschutz.html"
+    },
+    {
+      "label": "Legal Notice & Terms of Use",
+      "href": "https://www.mcdonalds.com/de/de-de/impressum-und-nutzungsbedingungen.html"
+    },
+    {
+      "label": "Report Human and Environmental Rights Concerns (German)",
+      "href": "https://www.mcdonalds.com/de/de-de/verteilerseite.html"
+    },
+    {
+      "label": "Reports on Human and Environmental Rights (English)",
+      "href": "https://www.mcdonalds.com/de/de-de/distribution-page.html"
+    },
+    {
+      "label": "Accessibility Statement",
+      "href": "https://www.mcdonalds.com/de/de-de/erklaerung-zur-barrierefreiheit.html"
+    },
+    {
+      "label": "Privacy Settings",
+      "href": null
+    }
+  ]
+}

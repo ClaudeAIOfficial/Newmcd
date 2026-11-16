@@ -1,3 +1,4 @@
+import { hasReviewStore, publishedBlobReviews, savePendingBlob } from "../../../lib/blob-reviews";
 import { getReviewDb } from "../../../lib/reviews";
 
 export const runtime = "nodejs";
@@ -9,6 +10,10 @@ const submissionIdPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f
 
 function json(body: unknown, status = 200) {
   return Response.json(body, { status, headers: { "Cache-Control": "no-store" } });
+}
+
+function conflictingSubmission() {
+  return json({ error: "This form already sent a different review. Start a new review to submit again." }, 409);
 }
 
 async function readBody(request: Request): Promise<unknown> {
@@ -39,7 +44,10 @@ async function readBody(request: Request): Promise<unknown> {
 export async function GET() {
   try {
     const sql = getReviewDb();
-    if (!sql) return json({ reviews: [], acceptingReviews: false });
+    if (!sql) {
+      if (!hasReviewStore()) return json({ reviews: [], acceptingReviews: false });
+      return json({ reviews: await publishedBlobReviews(), acceptingReviews: true });
+    }
 
     const reviews = await sql`
       SELECT id::text AS id, rating, review_text AS text, created_at AS date
@@ -55,7 +63,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const sql = getReviewDb();
-    if (!sql) {
+    if (!sql && !hasReviewStore()) {
       return json({ error: "Review submissions are temporarily unavailable." }, 503);
     }
     if (request.headers.get("Sec-Fetch-Site") === "cross-site") {
@@ -84,6 +92,10 @@ export async function POST(request: Request) {
     if (typeof submissionId !== "string" || !submissionIdPattern.test(submissionId)) {
       return json({ error: "Reopen the review form and try again." }, 400);
     }
+    if (!sql) {
+      const status = await savePendingBlob(submissionId, rating, reviewText);
+      return status === 409 ? conflictingSubmission() : json({ ok: true }, status);
+    }
     const [saved] = await sql`
       INSERT INTO public.reviews (submission_id, rating, review_text)
       VALUES (${submissionId}, ${rating}, ${reviewText})
@@ -97,7 +109,7 @@ export async function POST(request: Request) {
     if (previous?.rating === rating && previous.review_text === reviewText) {
       return json({ ok: true });
     }
-    return json({ error: "This form already sent a different review. Start a new review to submit again." }, 409);
+    return conflictingSubmission();
   } catch {
     return json({ error: "We couldn't save your review. Please try again." }, 503);
   }

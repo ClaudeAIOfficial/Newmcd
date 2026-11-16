@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
+import FeedbackFooter from "./FeedbackFooter";
 
 type IconName = "arrow" | "pencil" | "receipt" | "chat" | "close" | "check" | "back" | "star";
 function Icon({ name, size = 20, filled = false }: { name: IconName; size?: number; filled?: boolean }) {
@@ -136,7 +137,7 @@ export default function Home() {
         <aside className="receipt-card"><div className="receipt-copy"><h2>Got your receipt?</h2><p>You’ll need the number on it to leave a review.</p><button onClick={() => openPanel("help")} className="help-link">Find my receipt number <Icon name="arrow" size={15} /></button></div><ReceiptArt /></aside>
       </div>
     </main>
-    <footer><div className="shell footer-inner"><div className="footer-brand"><Arches className="footer-arches" /><span>McDonald’s Guest Feedback</span></div><button onClick={() => openPanel("help")}>Receipt help</button></div></footer>
+    <FeedbackFooter />
 
     <dialog ref={dialog} aria-labelledby="dialog-title" onClose={() => document.body.classList.remove("has-dialog")} onCancel={event => { if (sendingRef.current) event.preventDefault(); }} onClick={event => { if (event.target === event.currentTarget && !sendingRef.current) dialog.current?.close(); }}>
       <div className="dialog-content">

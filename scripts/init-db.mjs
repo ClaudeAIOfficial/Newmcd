@@ -27,6 +27,4 @@ if (url) {
   } finally {
     await sql.end({ timeout: 3 });
   }
-} else {
-  console.info("No DATABASE_URL configured. The site can build with review submissions paused.");
 }

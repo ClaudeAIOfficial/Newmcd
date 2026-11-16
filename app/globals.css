@@ -14,14 +14,14 @@ h1,h2,h3,p{margin:0}
 .skip-link{position:absolute;top:0;left:12px;padding:12px 18px;background:white;transform:translateY(-120%);z-index:10}
 .skip-link:focus{transform:none}
 .site-header{border-bottom:1px solid var(--line)}
-.header-inner,.brand,nav,.nav-action,.primary,.eyebrow,.help-link,.review-heading,.footer-brand,.text-button,.step-line,.back,.review-meta{display:flex;align-items:center}
+.header-inner,.brand,nav,.nav-action,.primary,.eyebrow,.help-link,.review-heading,.text-button,.step-line,.back,.review-meta{display:flex;align-items:center}
 .header-inner{height:86px;justify-content:space-between;gap:25px}
 .brand{gap:13px;font-size:23px;font-weight:750;letter-spacing:-1.15px}
 .header-arches{width:39px;height:35px;color:var(--yellow)}
 nav{gap:31px}
 .nav-link,.nav-action{font-size:14px;font-weight:650}
 .nav-link{padding:10px 0}
-.nav-link:hover,footer button:hover,.help-link:hover,.text-button:hover{text-decoration:underline;text-underline-offset:3px}
+.nav-link:hover,.help-link:hover,.text-button:hover{text-decoration:underline;text-underline-offset:3px}
 .nav-action{background:var(--yellow);padding:13px 19px;border-radius:9px;gap:9px}
 .nav-action:hover,.primary:hover{background:#f5ad00}
 main{padding-top:31px;padding-bottom:42px}
@@ -66,11 +66,6 @@ h1 span{color:var(--red)}
 .public-stars{display:flex;gap:3px;color:#a06100}
 .review-meta time{font-size:12px;color:var(--muted)}
 .guest-review p{line-height:1.5;margin-top:10px;white-space:pre-wrap;overflow-wrap:anywhere}
-footer{border-top:1px solid var(--line)}
-.footer-inner{min-height:74px;display:flex;justify-content:space-between;align-items:center;gap:16px}
-.footer-brand{gap:10px;font-size:12px;font-weight:650;color:#55524b}
-.footer-arches{width:23px;height:21px;color:var(--yellow)}
-footer button{font-size:12px;color:var(--muted);padding:10px 0}
 body.has-dialog{overflow:hidden}
 dialog{width:min(460px,calc(100% - 28px));padding:0;border:0;border-radius:18px;color:var(--ink);overflow:auto;max-height:calc(100dvh - 32px);box-shadow:0 25px 75px #211d1729}
 dialog::backdrop{background:#211f19a6}
@@ -106,6 +101,6 @@ fieldset{padding:0;border:0;margin:0 0 17px}
 .help-example>span{font-size:14px;line-height:1.5}
 @media(min-width:1450px){main{padding-top:43px}.below{margin-top:42px}main{padding-bottom:48px}}
 @media(max-width:880px){.shell{width:calc(100% - 48px)}.header-inner{height:74px}.hero-copy{padding:34px 24px}.meal-image{min-height:370px}h1{font-size:61px}.below{grid-template-columns:1.12fr 1fr;gap:19px}.receipt-card{padding-left:19px;padding-right:85px}.receipt-art{right:4px;width:66px;height:115px}.empty{padding:15px;gap:12px}.empty-icon{width:42px;height:42px}nav{gap:22px}}
-@media(max-width:650px){.shell{width:calc(100% - 32px)}.header-inner{height:67px}.brand{gap:8px;font-size:19px;letter-spacing:-.85px}.header-arches{width:29px;height:28px}nav{gap:0}.nav-link{display:none}.nav-action{font-size:13px;padding:10px 12px;gap:7px}.nav-action svg{width:14px}main{padding-top:17px;padding-bottom:24px}.hero{grid-template-columns:1fr;border-radius:15px}.hero-copy{padding:31px 26px 28px}.eyebrow{font-size:10px}h1{font-size:67px;margin-top:15px}.hero-intro{max-width:310px;margin-top:14px;font-size:16px}.hero-button{margin-top:18px;padding:12px 17px}.meal-image{min-height:0;aspect-ratio:1.7}.meal-image img{object-position:50% 53%}.below{display:flex;flex-direction:column;align-items:stretch;gap:19px;margin-top:27px}.review-heading{margin-bottom:13px}.empty{min-height:91px;padding:17px}.receipt-card{min-height:143px;padding:22px 101px 22px 21px}.receipt-art{width:81px;height:123px;right:14px}.receipt-copy h2{font-size:23px}.receipt-copy p{font-size:14px}.help-link{margin-top:9px}.footer-inner{min-height:62px}}
+@media(max-width:650px){.shell{width:calc(100% - 32px)}.header-inner{height:67px}.brand{gap:8px;font-size:19px;letter-spacing:-.85px}.header-arches{width:29px;height:28px}nav{gap:0}.nav-link{display:none}.nav-action{font-size:13px;padding:10px 12px;gap:7px}.nav-action svg{width:14px}main{padding-top:17px;padding-bottom:24px}.hero{grid-template-columns:1fr;border-radius:15px}.hero-copy{padding:31px 26px 28px}.eyebrow{font-size:10px}h1{font-size:67px;margin-top:15px}.hero-intro{max-width:310px;margin-top:14px;font-size:16px}.hero-button{margin-top:18px;padding:12px 17px}.meal-image{min-height:0;aspect-ratio:1.7}.meal-image img{object-position:50% 53%}.below{display:flex;flex-direction:column;align-items:stretch;gap:19px;margin-top:27px}.review-heading{margin-bottom:13px}.empty{min-height:91px;padding:17px}.receipt-card{min-height:143px;padding:22px 101px 22px 21px}.receipt-art{width:81px;height:123px;right:14px}.receipt-copy h2{font-size:23px}.receipt-copy p{font-size:14px}.help-link{margin-top:9px}}
 @media(max-width:355px){.shell{width:calc(100% - 24px)}.hero-copy{padding:26px 22px}h1{font-size:58px}.empty-icon{width:34px;height:34px}.empty{padding:13px;gap:10px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{transition:none!important;animation:none!important}}

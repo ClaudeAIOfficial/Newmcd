@@ -2,7 +2,9 @@
   "name": "mcdonalds-guest-feedback",
   "version": "1.0.0",
   "private": true,
-  "engines": { "node": "24.x" },
+  "engines": {
+    "node": "24.x"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "node --env-file-if-exists=.env.local scripts/init-db.mjs && next build",
@@ -10,10 +12,11 @@
     "db:init": "node --env-file-if-exists=.env.local scripts/init-db.mjs"
   },
   "dependencies": {
+    "@vercel/blob": "2.9.0",
     "next": "16.4.6",
+    "postgres": "3.4.9",
     "react": "19.3.1",
-    "react-dom": "19.3.1",
-    "postgres": "3.4.9"
+    "react-dom": "19.3.1"
   },
   "devDependencies": {
     "@types/node": "22.19.19",

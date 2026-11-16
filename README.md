@@ -1,27 +1,25 @@
-# McDonald's guest feedback on Vercel
+# McDonald’s guest feedback on Vercel
 
-## Deploy the ZIP
+## Deploy
 
-1. Sign in to [Vercel Drop](https://vercel.com/drop) and drag the ZIP onto the page. Vercel builds the Next.js app. You can open the homepage as soon as the deployment finishes.
-2. To turn on review submissions, use the project’s **Storage** tab to create or connect **Neon Postgres**. Connect it to this project’s **Production** environment. If you also use Preview, connect a separate preview database for test reviews. The integration supplies the server-only `DATABASE_URL` variable.
-3. In **Deployments**, redeploy the project after connecting the database. The build creates the reviews table automatically. Click **Write a review** to see the receipt-number step.
+Import this repository into Vercel or upload the ZIP to [Vercel Drop](https://vercel.com/drop). Use the folder containing `package.json` as the project root. Vercel builds the project with the supplied Next.js settings.
 
-If you already use PostgreSQL, you can set `DATABASE_URL` under the project’s **Settings → Environment Variables** and redeploy. Use a pooled connection string with the TLS settings supplied by your provider. The initial build needs permission to create a table and index in the public schema.
+The existing production project uses its private Vercel Blob store for reviews. To run another copy, create a **private Blob store** under the new Vercel project’s **Storage** tab, connect it to **Production**, and redeploy. The connection supplies the server-only `BLOB_READ_WRITE_TOKEN`. A project without review storage can display the homepage.
 
-## Deploy through GitHub
+## Collect and publish reviews
 
-Put the extracted files at your repository root. Import the repository into Vercel and select the **Next.js** preset. If you put the files in a subfolder, select that folder as the **Root Directory**. The folder must contain `package.json` and `vercel.json`. The ZIP supplies the install command, build command, Node.js version, and output directory. Connect Postgres and redeploy as described above.
+Guests enter a receipt number, a star rating, and a comment. The server checks the receipt format and discards the number. Each submission goes into a separate private JSON file under `pending/`.
+
+To publish selected reviews, use the Blob store dashboard to create or update `published/reviews.json`. Its contents are a JSON array. Append the approved pending object (fields `id`, `rating`, `text`, and `date`) to the array and upload it to that path. Keep existing approved entries when editing. The order of the array determines the order on the page. An empty list is `[]`. The public API reads this curated list only.
+
+## Optional PostgreSQL storage
+
+Projects with a configured `DATABASE_URL` use PostgreSQL as their review store. The build creates `public.reviews` when the variable is set. New submissions start with `published` set to false. Set it to true in your database editor to publish a row. Choose one store for ongoing use. Changing the provider requires moving any reviews you want to keep displaying.
 
 ## Custom domain
 
-In your Vercel project, open **Settings → Domains**, add `mcdonalds.feedback`, and use the DNS values Vercel displays for that project. Earlier DNS instructions for the ChatGPT-hosted copy point to a different host.
+Add the domain in the Vercel project’s **Settings → Domains** and use the DNS values Vercel gives for that project.
 
-## Review submissions
+## Local development
 
-The form requires a receipt number, a rating from 1 to 5, and a comment. It validates the receipt number's format and discards the number. It does not query a point-of-sale system. Submissions stay in Postgres across deployments. Opening the homepage works before storage setup. The form shows a paused message until the database is ready.
-
-To publish a review, open `public.reviews` in the database table editor and set `published` to `true` on the chosen row. Refresh the homepage to see it. To add a review supplied separately, create a row with `rating` and `review_text`, and set `published` to `true`. The database supplies the ID and timestamp.
-
-## Run locally
-
-Use Node.js 24 and run `npm ci`. Copy `.env.example` to `.env.local` and enter the connection string for your development database. Run `npm run db:init`, then `npm run dev`. Open http://localhost:3000. For a production build, use `npm run build` and `npm start`.
+Use Node.js 24 and run `npm ci`. Copy `.env.example` to `.env.local` and configure a development store. For PostgreSQL, run `npm run db:init`. Start the development server with `npm run dev` and open http://localhost:3000. Use `npm run build` and `npm start` to test the production build.
