@@ -18,6 +18,8 @@ if (url) {
           created_at timestamptz NOT NULL DEFAULT now()
         )
       `;
+      await tx`ALTER TABLE public.reviews ADD COLUMN IF NOT EXISTS display_name varchar(60)`;
+      await tx`ALTER TABLE public.reviews ADD COLUMN IF NOT EXISTS avatar_data text`;
       await tx`
         CREATE INDEX IF NOT EXISTS guest_reviews_published_order
         ON public.reviews (created_at DESC, id DESC) WHERE published = true
