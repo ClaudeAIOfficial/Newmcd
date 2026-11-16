@@ -132,11 +132,6 @@ export default function Home() {
         <div className="meal-image"><img src="/meal.webp" alt="Golden fries in a red McDonald’s carton beside a cheeseburger" fetchPriority="high" width="1400" height="1120" /></div>
       </section>
 
-      <section className="cat-event" aria-label="Cat-themed feedback event">
-        <img className="cat-event-photo" src="/cat-event-avatar.jpg" alt="Orange kitten wearing a McDonald’s uniform and hat, the event mascot" width="96" height="96"/>
-        <div className="cat-event-content"><p className="cat-event-eyebrow">SPECIAL FEEDBACK EVENT</p><h2>Meet our little review buddy.</h2><p>Our kitten mascot is cheering on every guest who shares their experience. The cat image represents the event, not the identity of individual reviewers.</p><a href="https://www.google.com/maps?ftid=0x865f8db3601fd491:0xf5bfd5ca98243fd2" target="_blank" rel="noopener noreferrer">Read original reviews on Google Maps <span aria-hidden="true">↗</span></a></div>
-      </section>
-
       <div className="below">
         <section id="reviews" className="reviews" aria-labelledby="reviews-title">
           <div className="review-heading"><h2 id="reviews-title">Guest reviews</h2>{listState === "ready" && <span className="count" aria-label={reviews.length + " reviews"}>{reviews.length}</span>}</div>
