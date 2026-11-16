@@ -1,6 +1,6 @@
 import { get, put } from "@vercel/blob";
 
-type Review = { id: string; rating: number; text: string; date: string };
+type Review = { id: string; rating: number; text: string; date: string; name?: string; source?: "google"; sourceUrl?: string };
 const publicListPath = "published/reviews.json";
 
 export function hasReviewStore() {
@@ -16,14 +16,29 @@ async function readJson(path: string): Promise<unknown> {
 
 function asReview(value: unknown): Review {
   if (!value || typeof value !== "object") throw new Error("Invalid review data.");
-  const { id, rating, text, date } = value as Partial<Review>;
+  const { id, rating, text, date, name, source, sourceUrl } = value as Partial<Review>;
   if (
     typeof id !== "string" || !id.trim() || id.length > 128 ||
     typeof rating !== "number" || !Number.isInteger(rating) || rating < 1 || rating > 5 ||
     typeof text !== "string" || !text.trim() || text.length > 2000 ||
     typeof date !== "string" || !Number.isFinite(Date.parse(date))
   ) throw new Error("Invalid review data.");
-  return { id, rating, text, date };
+  const clean: Review = { id, rating, text, date };
+  if (name !== undefined) {
+    if (typeof name !== "string" || !name.trim() || name.length > 100) throw new Error("Invalid reviewer name.");
+    clean.name = name.trim();
+  }
+  if (source !== undefined) {
+    if (source !== "google") throw new Error("Invalid review source.");
+    clean.source = "google";
+    if (typeof sourceUrl !== "string" || sourceUrl.length > 2000) throw new Error("Review source link required.");
+    let url: URL;
+    try { url = new URL(sourceUrl); } catch { throw new Error("Invalid review source link."); }
+    if (url.protocol !== "https:" || !["google.com","www.google.com","maps.google.com"].includes(url.hostname))
+      throw new Error("Review source must link to Google.");
+    clean.sourceUrl = url.toString();
+  }
+  return clean;
 }
 
 export async function publishedBlobReviews(): Promise<Review[]> {
