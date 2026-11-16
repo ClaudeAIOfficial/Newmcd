@@ -173,3 +173,6 @@ fieldset{padding:0;border:0;margin:0 0 17px}
 .rating-filter.active{background:#ffbc0d;border-color:#ffbc0d;color:#211e18}
 .filter-count{margin:0 0 15px;color:#68645e;font-size:12px}
 @media(max-width:700px){.review-list{grid-template-columns:1fr}.below{gap:20px}.review-filters{gap:6px}.rating-filter{padding:8px 11px;font-size:12px}}
+
+.rating-filter-count{display:inline-flex;align-items:center;justify-content:center;min-width:20px;margin-left:5px;padding:2px 5px;border-radius:999px;background:rgba(0,0,0,.065);font-size:11px;font-weight:750;font-variant-numeric:tabular-nums}
+.rating-filter.active .rating-filter-count{background:rgba(0,0,0,.12)}
