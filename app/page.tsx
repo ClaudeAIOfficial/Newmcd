@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import FeedbackFooter from "./FeedbackFooter";
-import { sampleReviews } from "../lib/sample-reviews";
 
 type IconName = "arrow" | "pencil" | "receipt" | "chat" | "close" | "check" | "back" | "star";
 function Icon({ name, size = 20, filled = false }: { name: IconName; size?: number; filled?: boolean }) {
@@ -70,9 +69,7 @@ export default function Home() {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [listState, setListState] = useState<"loading" | "ready" | "error">("loading");
   const [guestProfile, setGuestProfile] = useState<string | null>(null);
-  const [visibleSamples, setVisibleSamples] = useState(12);
   const [sampleRatingFilter, setSampleRatingFilter] = useState(0);
-  const filteredSamples = sampleRatingFilter === 0 ? sampleReviews : sampleReviews.filter(r => r.rating === sampleRatingFilter);
 
   const loadReviews = useCallback(async () => {
     setListState("loading");
@@ -159,7 +156,7 @@ export default function Home() {
       <div className="below">
         <section id="reviews" className="reviews" aria-labelledby="reviews-title">
           <div className="review-heading"><h2 id="reviews-title">Guest reviews</h2>{listState === "ready" && <span className="count" aria-label={reviews.length + " reviews"}>{reviews.length}</span>}</div><div className="review-filters" role="group" aria-label="Filter reviews by star rating">
-              {[0,5,4,3,2,1].map(stars => <button key={stars} type="button" className={"rating-filter" + (sampleRatingFilter === stars ? " active" : "")} aria-pressed={sampleRatingFilter === stars} onClick={() => {setSampleRatingFilter(stars);setVisibleSamples(12);}}>{stars === 0 ? "All ratings" : stars + " ★"} <span className="rating-filter-count">{stars === 0 ? sampleReviews.length + reviews.length : sampleReviews.filter(r => r.rating === stars).length + reviews.filter(r => r.rating === stars).length}</span></button>)}
+              {[0,5,4,3,2,1].map(stars => <button key={stars} type="button" className={"rating-filter" + (sampleRatingFilter === stars ? " active" : "")} aria-pressed={sampleRatingFilter === stars} onClick={() => {setSampleRatingFilter(stars);}}>{stars === 0 ? "All ratings" : stars + " ★"} <span className="rating-filter-count">{stars === 0 ? reviews.length : reviews.filter(r => r.rating === stars).length}</span></button>)}
             </div>
           {listState === "ready" && reviews.length > 0 && (
             <div className="review-list published-review-list" aria-live="polite">
