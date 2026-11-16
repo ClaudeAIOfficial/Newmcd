@@ -41,7 +41,7 @@ function ReviewCard({review:r,demo=false}:{review:Review;demo?:boolean}) {
     : null;
   return <article className="guest-review" aria-label={demo ? "Sample review, not real customer feedback" : undefined}>
     <div className="guest-review-byline">
-      {demo && r.catAvatar ? <img className={`review-avatar review-avatar-cat variant-${r.catVariant ?? 0}`} src="/review-cat-avatar.jpg" alt="" aria-hidden="true" width="40" height="40" loading="lazy"/> : <span className="review-avatar" aria-hidden="true">{initial}</span>}
+      {demo && r.catAvatar ? <img className={`review-avatar review-avatar-cat variant-${r.catVariant ?? 0}`} src={(r.catVariant === 0 || r.catVariant === 2) ? "/review-cat-full.svg" : "/review-cat-avatar.jpg"} alt="" aria-hidden="true" width="40" height="40" loading="lazy"/> : <span className="review-avatar" aria-hidden="true">{initial}</span>}
       <div><strong>{displayName}</strong>{!demo && <span>{r.source === "google" ? "Review from Google Maps" : "Guest feedback"}</span>}</div>
     </div>
     <div className="review-meta">
