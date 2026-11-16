@@ -1,4 +1,4 @@
-export type SampleReview = { id: string; name: string; rating: number; text: string; date: string; sample: true };
+export type SampleReview = { id: string; name: string; rating: number; text: string; date: string; sample: true; catAvatar: boolean };
 
 const locations = ["the counter", "the dining area", "the drive-through", "the ordering kiosk", "the pickup counter"];
 const openings = [
@@ -59,7 +59,10 @@ const endings = [
 ];
 
 /** Fictional layout fixtures, never real customer testimony. */
-export const sampleReviews: SampleReview[] = Array.from({ length: 500 }, (_, i) => {
+const firstNames = ["Alex","Jordan","Taylor","Morgan","Casey","Avery","Jamie","Riley","Quinn","Sam","Cameron","Drew","Parker","Charlie","Reese","Bailey","Sydney","Skyler","Rowan","Robin","Jessie","Emerson","Hayden","Elliot","Frankie","Kendall","Shawn","Dakota","Harper","Arden","Lee","Micah","Sage","Noel","Reagan","Finley","Marley","Kit","Jules","Blair","Devin","Toby","Corey","Ash","Remy","Cody","Milan","Logan","Nico","Ellis"];
+const lastNames = ["Anderson","Bennett","Carter","Davis","Edwards","Foster","Garcia","Harris","Iverson","Johnson","King","Lewis","Miller","Nelson","Ortiz","Parker","Quinn","Reed","Sullivan","Turner","Vargas","Walker","Young","Zimmerman","Brooks","Collins","Diaz","Evans","Flores","Graham","Hughes","Ingram","Jenkins","Knight","Lopez","Mitchell","Owens","Price","Rivera","Stewart"];
+
+export const sampleReviews: SampleReview[] = Array.from({ length: 1500 }, (_, i) => {
   const rating = [5, 4, 5, 3, 4, 2, 5, 4, 3, 1][i % 10];
   const place = locations[(i * 3) % locations.length];
   const text = openings[i % openings.length] + " " +
@@ -69,10 +72,11 @@ export const sampleReviews: SampleReview[] = Array.from({ length: 500 }, (_, i) 
   const daysAgo = (i * 7 + Math.floor(i / 20)) % 30;
   return {
     id: "sample-" + (i + 1),
-    name: "Guest " + String(i + 1).padStart(3, "0"),
+    name: firstNames[i % firstNames.length] + " " + lastNames[Math.floor(i / firstNames.length) % lastNames.length],
     rating,
     text,
     date: new Date(Date.UTC(2026, 10, 16 - daysAgo, 12)).toISOString(),
+    catAvatar: i < 600,
     sample: true as const
   };
 });
