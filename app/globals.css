@@ -104,3 +104,16 @@ fieldset{padding:0;border:0;margin:0 0 17px}
 @media(max-width:650px){.shell{width:calc(100% - 32px)}.header-inner{height:67px}.brand{gap:8px;font-size:19px;letter-spacing:-.85px}.header-arches{width:29px;height:28px}nav{gap:0}.nav-link{display:none}.nav-action{font-size:13px;padding:10px 12px;gap:7px}.nav-action svg{width:14px}main{padding-top:17px;padding-bottom:24px}.hero{grid-template-columns:1fr;border-radius:15px}.hero-copy{padding:31px 26px 28px}.eyebrow{font-size:10px}h1{font-size:67px;margin-top:15px}.hero-intro{max-width:310px;margin-top:14px;font-size:16px}.hero-button{margin-top:18px;padding:12px 17px}.meal-image{min-height:0;aspect-ratio:1.7}.meal-image img{object-position:50% 53%}.below{display:flex;flex-direction:column;align-items:stretch;gap:19px;margin-top:27px}.review-heading{margin-bottom:13px}.empty{min-height:91px;padding:17px}.receipt-card{min-height:143px;padding:22px 101px 22px 21px}.receipt-art{width:81px;height:123px;right:14px}.receipt-copy h2{font-size:23px}.receipt-copy p{font-size:14px}.help-link{margin-top:9px}}
 @media(max-width:355px){.shell{width:calc(100% - 24px)}.hero-copy{padding:26px 22px}h1{font-size:58px}.empty-icon{width:34px;height:34px}.empty{padding:13px;gap:10px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{transition:none!important;animation:none!important}}
+
+
+/* Review account registration */
+.account-dialog{width:min(480px,calc(100% - 28px))}
+.account-dialog .dialog-content{padding-top:38px}
+.account-dialog label{display:block;font-size:14px;font-weight:700;margin:13px 0 8px}
+.account-dialog input{display:block;width:100%;padding:12px 13px;border:1px solid #a6a398;border-radius:8px;font-size:16px;background:#fff;color:var(--ink)}
+.account-dialog .step-line{display:block;margin:0 0 14px}
+.account-dialog h2{font-size:clamp(28px,3.3vw,36px);line-height:1.05;letter-spacing:-1.5px}
+.account-switch{margin-top:19px;text-align:center;font-size:14px;color:var(--muted)}
+.account-switch button{font-size:14px;color:#a21222;font-weight:750;text-decoration:underline;text-underline-offset:3px}
+.account-notice{font-size:14px;line-height:1.5;margin-top:14px;color:#375c25}
+@media(max-width:650px){.account-nav{display:inline-block!important;margin-right:9px;font-size:13px!important}}
