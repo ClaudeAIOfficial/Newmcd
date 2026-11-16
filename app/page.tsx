@@ -61,7 +61,17 @@ export default function Home() {
   useEffect(() => {
     fetch("/api/auth", {cache:"no-store"})
       .then(r => r.json())
-      .then(data => {setAccount(data.user || null);setAccountConfigured(data.configured === true);})
+      .then(data => {
+        const configured = data.configured === true;
+        setAccountConfigured(configured);
+        if (configured) setAccount(data.user || null);
+        else {
+          try {
+            const saved = localStorage.getItem("guest-feedback-demo-session");
+            if (saved) setAccount({id:saved,email:saved});
+          } catch { /* Storage can be disabled */ }
+        }
+      })
       .catch(() => setAccount(null))
       .finally(() => setAccountReady(true));
   }, []);
@@ -74,11 +84,38 @@ export default function Home() {
     if (!submissionId.current) submissionId.current = crypto.randomUUID();
     if (!dialog.current?.open) { dialog.current?.showModal();document.body.classList.add("has-dialog"); }
   }
+  async function demoDigest(email: string, password: string, salt: string) {
+    const bytes = new TextEncoder().encode(`${salt}:${email}:${password}`);
+    const buffer = await crypto.subtle.digest("SHA-256", bytes);
+    return Array.from(new Uint8Array(buffer), b => b.toString(16).padStart(2,"0")).join("");
+  }
+  async function demoLogin() {
+    const email = accountEmail.trim().toLowerCase();
+    const key = "guest-feedback-demo-account:" + email;
+    const raw = localStorage.getItem(key);
+    if (accountMode === "signup") {
+      if (raw) throw new Error("This email already has a demo account. Please sign in.");
+      const salt = crypto.randomUUID();
+      const digest = await demoDigest(email,accountPassword,salt);
+      localStorage.setItem(key,JSON.stringify({salt,digest}));
+    } else {
+      if (!raw) throw new Error("No demo account exists for that email. Create one first.");
+      let record: {salt:string;digest:string};
+      try {record = JSON.parse(raw);} catch {throw new Error("Unable to read this demo account.");}
+      if (await demoDigest(email,accountPassword,record.salt) !== record.digest) throw new Error("Incorrect password.");
+    }
+    localStorage.setItem("guest-feedback-demo-session",email);
+    setAccount({id:email,email});
+    setAccountPassword("");
+    accountDialog.current?.close();
+    showReceipt();
+  }
   async function accountSubmit(event: FormEvent) {
     event.preventDefault();
     if (accountBusy) return;
     setAccountBusy(true);setAccountError("");setAccountNotice("");
     try {
+      if (!accountConfigured) {await demoLogin(); return;}
       const res = await fetch("/api/auth", {method:"POST",headers:{"Content-Type":"application/json"},
         body:JSON.stringify({action:accountMode,email:accountEmail,password:accountPassword})});
       const data = await res.json() as {user?:{id:string;email?:string};error?:string;confirmationRequired?:boolean;message?:string};
@@ -95,6 +132,7 @@ export default function Home() {
     finally {setAccountBusy(false);}
   }
   async function logout() {
+    if (!accountConfigured) {localStorage.removeItem("guest-feedback-demo-session");setAccount(null);setAccountPassword("");return;}
     await fetch("/api/auth", {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"logout"})});
     setAccount(null);setAccountPassword("");
   }
@@ -237,14 +275,14 @@ export default function Home() {
         <p className="step-line">ACCOUNT REQUIRED</p>
         <h2>{accountMode === "signup" ? "Create your account" : "Welcome back"}</h2>
         <p className="dialog-blurb">{accountMode === "signup" ? "Create an account before sharing your feedback. You'll still need your receipt number." : "Sign in to continue with your receipt and review."}</p>
-        {!accountConfigured && accountReady ? <p className="error" role="alert">Account registration is not available yet. The site owner must connect the authentication provider.</p> : null}
+        {!accountConfigured && accountReady && <p className="field-hint">Demo account. This browser keeps your account details locally.</p>}
         <label htmlFor="account-email">Email address</label>
         <input id="account-email" type="email" autoComplete="email" required maxLength={254} value={accountEmail} onChange={e=>setAccountEmail(e.target.value)} placeholder="you@example.com" />
         <label htmlFor="account-password" style={{marginTop:16}}>Password</label>
         <input id="account-password" type="password" minLength={8} maxLength={128} autoComplete={accountMode === "signup" ? "new-password" : "current-password"} required value={accountPassword} onChange={e=>setAccountPassword(e.target.value)} placeholder="At least 8 characters" />
         {accountError && <p className="error" role="alert">{accountError}</p>}
         {accountNotice && <p className="account-notice" role="status">{accountNotice}</p>}
-        <button className="primary full" type="submit" disabled={accountBusy || !accountConfigured || !accountReady}>{accountBusy ? "Please wait…" : accountMode === "signup" ? "Create account" : "Sign in"} <Icon name="arrow" size={17}/></button>
+        <button className="primary full" type="submit" disabled={accountBusy || !accountReady}>{accountBusy ? "Please wait…" : accountMode === "signup" ? "Create account" : "Sign in"} <Icon name="arrow" size={17}/></button>
         <p className="account-switch">{accountMode === "signup" ? "Already have an account?" : "New here?"} <button type="button" onClick={() => {setAccountMode(accountMode === "signup" ? "login" : "signup");setAccountError("");setAccountNotice("");}}>{accountMode === "signup" ? "Sign in" : "Create an account"}</button></p>
       </form>
     </dialog>
