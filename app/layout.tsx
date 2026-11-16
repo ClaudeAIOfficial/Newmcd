@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(vercelHost ? `https://${vercelHost}` : "http://localhost:3000"),
   title: "Guest Feedback | McDonald’s",
   description: "How was your visit? Share a McDonald’s restaurant review using the number on your receipt.",
-  icons: { icon: "/favicon.svg" },
+  icons: { icon: "/favicon.svg?v=green-20261116", shortcut: "/favicon.svg?v=green-20261116", apple: "/favicon.svg?v=green-20261116" },
   openGraph: { title: "How was your visit? | McDonald’s Guest Feedback", description: "Tell us about your last visit.", images: ["/meal.webp"] },
 };
 
