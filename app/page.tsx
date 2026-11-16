@@ -167,10 +167,9 @@ export default function Home() {
             </div>
           )}
           <section className="sample-reviews" aria-labelledby="sample-review-title">
-            <div className="sample-heading"><div><p className="sample-kicker">DESIGN PREVIEW</p><h3 id="sample-review-title">1,500 sample reviews</h3></div><span className="sample-count">Fictional examples</span></div>
-            <p className="sample-disclosure">These are fictional examples for testing the review layout, not real McDonald's customer reviews or Google Maps ratings.</p>
+            <h3 id="sample-review-title" className="sample-review-caption">Example reviews generated for layout testing, not customer submissions</h3>
             
-            <p className="filter-count" aria-live="polite">Showing {Math.min(visibleSamples,filteredSamples.length)} of {filteredSamples.length} fictional examples</p>
+            <p className="filter-count" aria-live="polite">Showing {Math.min(visibleSamples,filteredSamples.length)} of {filteredSamples.length} examples</p>
             <div className="review-list">{filteredSamples.slice(0,visibleSamples).map(r => <ReviewCard key={r.id} review={r} demo/>)}</div>
             {visibleSamples < filteredSamples.length && <button type="button" className="sample-more" onClick={() => setVisibleSamples(v=>Math.min(v+20,filteredSamples.length))}>Show more reviews ({filteredSamples.length-visibleSamples} remaining)</button>}
           </section>
